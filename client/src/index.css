@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #FDFBF7;
+    background-image: radial-gradient(#1A1A1A 1px, transparent 1px);
+    background-size: 24px 24px;
+    color: #1A1A1A;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: #FFD000;
+    color: #1A1A1A;
+  }
+}
+
+@layer components {
+  /* Neo-brutalist basics */
+  .brutal-border {
+    @apply border-4 border-brutal-black;
+  }
+
+  .brutal-card {
+    @apply bg-white brutal-border rounded-xl shadow-brutal transition-all duration-200;
+  }
+
+  .brutal-card-hover {
+    @apply brutal-card hover:-translate-y-1 hover:-translate-x-1 hover:shadow-brutal-lg;
+  }
+
+  /* Buttons */
+  .brutal-btn {
+    @apply relative px-8 py-4 font-bold rounded-xl brutal-border shadow-brutal 
+           transition-all duration-150 active:translate-x-1 active:translate-y-1 active:shadow-brutal-hover
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:active:shadow-brutal;
+  }
+
+  .btn-primary {
+    @apply brutal-btn bg-brutal-yellow text-brutal-black hover:bg-brutal-pink;
+  }
+
+  .btn-secondary {
+    @apply brutal-btn bg-white text-brutal-black hover:bg-brutal-blue;
+  }
+
+  /* Inputs */
+  .brutal-input {
+    @apply w-full bg-white brutal-border rounded-xl px-4 py-3 text-brutal-black placeholder-gray-400 font-medium
+           transition-all duration-200 focus:outline-none focus:ring-0 focus:shadow-brutal focus:-translate-y-0.5 focus:-translate-x-0.5;
+  }
+
+  /* Badges */
+  .brutal-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 font-bold rounded-lg border-2 border-brutal-black uppercase tracking-wide shadow-[2px_2px_0px_0px_rgba(26,26,26,1)];
+  }
+
+  .badge-safe {
+    @apply bg-brutal-green text-brutal-black;
+  }
+  .badge-low {
+    @apply bg-brutal-yellow text-brutal-black;
+  }
+  .badge-medium {
+    @apply bg-brutal-orange text-brutal-black;
+  }
+  .badge-high {
+    @apply bg-brutal-red text-brutal-black;
+  }
+}
+
+/* Custom bold scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FDFBF7;
+  border-left: 4px solid #1A1A1A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FFD000;
+  border-left: 4px solid #1A1A1A;
+  border-bottom: 4px solid #1A1A1A;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF8AAB;
+}
+
+/* Stagger animation */
+.stagger-item {
+  opacity: 0;
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Progress Marquee Banner */
+.progress-marquee {
+  width: 200%;
+  display: flex;
+  white-space: nowrap;
+}
