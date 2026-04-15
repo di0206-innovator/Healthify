@@ -5,13 +5,10 @@ import type { AuthPayload } from './types';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('FATAL: JWT_SECRET environment variable must be set in production');
-  }
-  console.warn('⚠️  JWT_SECRET is not set. Using insecure fallback for development.');
+  throw new Error('FATAL: JWT_SECRET environment variable must be set');
 }
 
-const SECRET = JWT_SECRET || 'healthify-dev-secret-do-not-use-in-prod';
+const SECRET = JWT_SECRET;
 const JWT_EXPIRY = '7d';
 const PBKDF2_ITERATIONS = 210000;
 

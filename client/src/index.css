@@ -5,6 +5,32 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --brutal-black: #1A1A1A;
+    --brutal-yellow: #FFD000;
+    --brutal-pink: #FF8AAB;
+    --brutal-blue: #00A3FF;
+    --brutal-green: #00E676;
+    --brutal-red: #FF5252;
+    --brutal-orange: #FF9100;
+    
+    /* Fluid Typography */
+    --font-size-hero: clamp(3rem, 10vw + 1rem, 6rem);
+    --font-size-h2: clamp(2rem, 5vw + 1rem, 3.5rem);
+    --font-size-body: clamp(1rem, 1vw + 0.75rem, 1.25rem);
+    
+    /* Dynamic Shadows */
+    --brutal-shadow: 4px 4px 0px 0px var(--brutal-black);
+    --brutal-shadow-lg: 8px 8px 0px 0px var(--brutal-black);
+  }
+
+  @media (max-width: 640px) {
+    :root {
+      --brutal-shadow: 2px 2px 0px 0px var(--brutal-black);
+      --brutal-shadow-lg: 4px 4px 0px 0px var(--brutal-black);
+    }
+  }
+
   * {
     margin: 0;
     padding: 0;
@@ -13,14 +39,16 @@
 
   html {
     scroll-behavior: smooth;
+    font-size: 16px;
   }
 
   body {
     font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: var(--font-size-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: #FDFBF7;
-    background-image: radial-gradient(#1A1A1A 1px, transparent 1px);
+    background-image: radial-gradient(#1A1A1A 0.5px, transparent 0.5px);
     background-size: 24px 24px;
     color: #1A1A1A;
     min-height: 100vh;
@@ -39,18 +67,38 @@
   }
 
   .brutal-card {
-    @apply bg-white brutal-border rounded-xl shadow-brutal transition-all duration-200;
+    background-color: white;
+    border: 4px solid var(--brutal-black);
+    border-radius: 0.75rem;
+    box-shadow: var(--brutal-shadow);
+    transition: all 0.2s ease;
   }
 
   .brutal-card-hover {
-    @apply brutal-card hover:-translate-y-1 hover:-translate-x-1 hover:shadow-brutal-lg;
+    @apply brutal-card hover:-translate-y-1 hover:-translate-x-1;
+    box-shadow: var(--brutal-shadow);
+  }
+  
+  .brutal-card-hover:hover {
+    box-shadow: var(--brutal-shadow-lg);
   }
 
   /* Buttons */
   .brutal-btn {
-    @apply relative px-8 py-4 font-bold rounded-xl brutal-border shadow-brutal 
-           transition-all duration-150 active:translate-x-1 active:translate-y-1 active:shadow-brutal-hover
-           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:active:shadow-brutal;
+    @apply relative px-8 py-4 font-bold rounded-xl transition-all duration-150;
+    border: 4px solid var(--brutal-black);
+    box-shadow: var(--brutal-shadow);
+  }
+  
+  .brutal-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+  }
+  
+  .brutal-btn:disabled {
+    @apply opacity-50 cursor-not-allowed;
+    transform: none !important;
+    box-shadow: var(--brutal-shadow) !important;
   }
 
   .btn-primary {
@@ -63,13 +111,22 @@
 
   /* Inputs */
   .brutal-input {
-    @apply w-full bg-white brutal-border rounded-xl px-4 py-3 text-brutal-black placeholder-gray-400 font-medium
-           transition-all duration-200 focus:outline-none focus:ring-0 focus:shadow-brutal focus:-translate-y-0.5 focus:-translate-x-0.5;
+    @apply w-full bg-white px-4 py-3 text-brutal-black placeholder-gray-400 font-medium
+           transition-all duration-200 focus:outline-none focus:ring-0;
+    border: 4px solid var(--brutal-black);
+    border-radius: 0.75rem;
+  }
+  
+  .brutal-input:focus {
+    box-shadow: var(--brutal-shadow);
+    transform: translate(-2px, -2px);
   }
 
   /* Badges */
   .brutal-badge {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 font-bold rounded-lg border-2 border-brutal-black uppercase tracking-wide shadow-[2px_2px_0px_0px_rgba(26,26,26,1)];
+    @apply inline-flex items-center gap-1.5 px-3 py-1 font-bold rounded-lg uppercase tracking-wide;
+    border: 2px solid var(--brutal-black);
+    box-shadow: 2px 2px 0px 0px var(--brutal-black);
   }
 
   .badge-safe {

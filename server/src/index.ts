@@ -15,13 +15,28 @@ import type { ScanRequest, OcrRequest, SignupRequest, LoginRequest } from './typ
 
 dotenv.config();
 
+// Production Environment Validation
+const REQUIRED_ENV_VARS = ['GEMINI_API_KEY', 'JWT_SECRET'];
+REQUIRED_ENV_VARS.forEach((key) => {
+  if (!process.env[key]) {
+    console.error(`❌ CRITICAL ERROR: Environment variable ${key} is missing.`);
+    process.exit(1);
+  }
+});
+
 const app = express();
 const PORT = process.env.PORT || 3001;
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Security Middleware
 app.use(helmet());
-app.use(cors());
-app.use(express.json({ limit: '5mb' })); // Reduced limit for safety
+app.use(cors({
+  origin: isProduction 
+    ? (process.env.ALLOWED_ORIGINS?.split(',') || []) 
+    : ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  credentials: true
+}));
+app.use(express.json({ limit: '5mb' }));
 
 // Rate Limiters
 const authLimiter = rateLimit({

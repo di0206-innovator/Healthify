@@ -125,12 +125,17 @@ export default function Scanner({ onReportReady }: ScannerProps) {
     <div className="w-full max-w-2xl mx-auto space-y-6" id="scanner">
       {/* Header */}
       <div className="text-center space-y-4">
-        <h1 className="text-5xl sm:text-6xl font-display font-black text-brutal-black leading-tight tracking-tight uppercase" style={{ textShadow: '4px 4px 0 #FFD000' }}>
-          Scan Your Ingredients
+        <h1 
+          className="font-display font-black text-brutal-black leading-[0.9] tracking-tighter uppercase" 
+          style={{ fontSize: 'var(--font-size-hero)', textShadow: 'var(--brutal-shadow)' }}
+        >
+          Scan Your <br className="sm:hidden" /> Ingredients
         </h1>
-        <p className="text-brutal-black text-xl font-bold max-w-md mx-auto bg-white border-2 border-brutal-black px-4 py-2 rounded-lg shadow-[4px_4px_0_0_#1A1A1A] rotate-1 inline-block">
-          Paste an ingredient list or upload a photo to get a safety report.
-        </p>
+        <div className="flex justify-center">
+          <p className="text-brutal-black text-lg sm:text-xl font-bold max-w-md bg-white border-4 border-brutal-black px-6 py-2 rounded-xl shadow-brutal rotate-1 inline-block">
+            Health-check your food in seconds.
+          </p>
+        </div>
       </div>
 
       {/* Input Area */}
@@ -231,7 +236,7 @@ export default function Scanner({ onReportReady }: ScannerProps) {
         <button
           onClick={handleScan}
           disabled={isScanning || ocrLoading || !ingredientText.trim()}
-          className="btn-primary w-full text-2xl uppercase tracking-wider py-6 flex items-center justify-center gap-3 active:scale-95"
+          className="btn-primary w-full text-xl sm:text-2xl uppercase tracking-wider py-5 sm:py-6 flex items-center justify-center gap-3 active:scale-95"
           id="scan-button"
         >
           {isScanning ? (

@@ -11,7 +11,7 @@ Return ONLY a JSON object. No markdown, no intro.
 Example:
 {
   "High Fructose Corn Syrup": "Honey or Maple Syrup",
-  "Aspartame": "Stevia or Monk Fruit"
+  "Blue 1": "Butterfly Pea Flower or Spirulina"
 }
 `;
 

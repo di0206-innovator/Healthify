@@ -11,14 +11,41 @@ if (!apiKey || apiKey === 'your_key_here') {
 const genAI = new GoogleGenerativeAI(apiKey || '');
 
 /**
+ * Helper for exponential backoff retries on transient errors (429, 500, 503)
+ */
+async function withRetry<T>(fn: () => Promise<T>, retries = 3, initialDelay = 1000): Promise<T> {
+  let lastError: any;
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+      const status = error?.status || error?.response?.status;
+      // Retry on Rate limit (429) or Server errors (5xx)
+      const isRetryable = status === 429 || (status >= 500 && status <= 599) || error.message?.includes('fetch failed');
+      
+      if (i < retries && isRetryable) {
+        const delay = initialDelay * Math.pow(2, i);
+        console.warn(`⚠️  Agent call failed (Status: ${status}). Retrying in ${delay}ms... (Attempt ${i + 1}/${retries})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      break;
+    }
+  }
+  throw lastError;
+}
+
+/**
  * Call Gemini with a system prompt and user input, expecting JSON back.
- * Includes retry logic for markdown-wrapped responses.
+ * Includes exponential backoff for resilience.
  */
 export async function callGemini(
   systemPrompt: string,
   userInput: string,
   timeoutMs: number = 30000
 ): Promise<any> {
+  return withRetry(async () => {
   const model = genAI.getGenerativeModel({
     model: 'gemini-1.5-flash',
     generationConfig: {
@@ -31,26 +58,27 @@ export async function callGemini(
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-  try {
-    const result = await model.generateContent({
-      contents: [
-        {
-          role: 'user',
-          parts: [{ text: `${systemPrompt}\n\n---\n\nInput:\n${userInput}` }],
-        },
-      ],
-    });
+    try {
+      const result = await model.generateContent({
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: `${systemPrompt}\n\n---\n\nInput:\n${userInput}` }],
+          },
+        ],
+      });
 
-    clearTimeout(timeout);
-    const text = result.response.text();
-    return parseJsonResponse(text);
-  } catch (error: any) {
-    clearTimeout(timeout);
-    if (error.name === 'AbortError') {
-      throw new Error('Agent call timed out after ' + timeoutMs + 'ms');
+      clearTimeout(timeout);
+      const text = result.response.text();
+      return parseJsonResponse(text);
+    } catch (error: any) {
+      clearTimeout(timeout);
+      if (error.name === 'AbortError') {
+        throw new Error('Agent call timed out after ' + timeoutMs + 'ms');
+      }
+      throw error;
     }
-    throw error;
-  }
+  });
 }
 
 /**
@@ -62,6 +90,7 @@ export async function callGeminiVision(
   mimeType: string = 'image/jpeg',
   timeoutMs: number = 30000
 ): Promise<string> {
+  return withRetry(async () => {
   const model = genAI.getGenerativeModel({
     model: 'gemini-1.5-flash',
     generationConfig: {
@@ -73,33 +102,34 @@ export async function callGeminiVision(
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-  try {
-    const result = await model.generateContent({
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                mimeType,
-                data: imageBase64,
+    try {
+      const result = await model.generateContent({
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              { text: prompt },
+              {
+                inlineData: {
+                  mimeType,
+                  data: imageBase64,
+                },
               },
-            },
-          ],
-        },
-      ],
-    });
+            ],
+          },
+        ],
+      });
 
-    clearTimeout(timeout);
-    return result.response.text().trim();
-  } catch (error: any) {
-    clearTimeout(timeout);
-    if (error.name === 'AbortError') {
-      throw new Error('Vision call timed out after ' + timeoutMs + 'ms');
+      clearTimeout(timeout);
+      return result.response.text().trim();
+    } catch (error: any) {
+      clearTimeout(timeout);
+      if (error.name === 'AbortError') {
+        throw new Error('Vision call timed out after ' + timeoutMs + 'ms');
+      }
+      throw error;
     }
-    throw error;
-  }
+  });
 }
 
 /**
