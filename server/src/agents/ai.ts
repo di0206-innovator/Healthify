@@ -22,8 +22,9 @@ export async function callGemini(
   const model = genAI.getGenerativeModel({
     model: 'gemini-1.5-flash',
     generationConfig: {
-      temperature: 0.2,
-      maxOutputTokens: 8192,
+      temperature: 0.1,
+      maxOutputTokens: 2048,
+      responseMimeType: 'application/json',
     },
   });
 
@@ -102,25 +103,20 @@ export async function callGeminiVision(
 }
 
 /**
- * Parse JSON from Gemini response, stripping markdown fences if present.
+ * Parse JSON from Gemini response. 
+ * Since we use responseMimeType: 'application/json', this is usually a direct parse.
  */
 function parseJsonResponse(text: string): any {
-  let cleaned = text.trim();
-
-  // Strip markdown code fences
-  if (cleaned.startsWith('```')) {
-    cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
-  }
-
+  const cleaned = text.trim();
   try {
     return JSON.parse(cleaned);
   } catch (e) {
-    // Try to extract JSON array or object
-    const jsonMatch = cleaned.match(/(\[[\s\S]*\]|\{[\s\S]*\})/);
+    // Fallback search for JSON structure if model ignores mime type
+    const jsonMatch = cleaned.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
     if (jsonMatch) {
       try {
         return JSON.parse(jsonMatch[1]);
-      } catch (e2) {
+      } catch {
         throw new Error('Agent returned unparseable response');
       }
     }

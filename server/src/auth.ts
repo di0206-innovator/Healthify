@@ -3,15 +3,24 @@ import jwt from 'jsonwebtoken';
 import type { Request, Response, NextFunction } from 'express';
 import type { AuthPayload } from './types';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'healthify-hackathon-secret-2024';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('FATAL: JWT_SECRET environment variable must be set in production');
+  }
+  console.warn('⚠️  JWT_SECRET is not set. Using insecure fallback for development.');
+}
+
+const SECRET = JWT_SECRET || 'healthify-dev-secret-do-not-use-in-prod';
 const JWT_EXPIRY = '7d';
+const PBKDF2_ITERATIONS = 210000;
 
 /**
  * Hash a password using PBKDF2 (no external deps needed)
  */
 export function hashPassword(password: string): string {
   const salt = crypto.randomBytes(16).toString('hex');
-  const hash = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, 64, 'sha512').toString('hex');
   return `${salt}:${hash}`;
 }
 
@@ -19,23 +28,22 @@ export function hashPassword(password: string): string {
  * Verify a password against a stored hash
  */
 export function verifyPassword(password: string, stored: string): boolean {
-  const [salt, hash] = stored.split(':');
-  const verify = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
+  const parts = stored.split(':');
+  if (parts.length !== 2) return false;
+  const [salt, hash] = parts;
+  const verify = crypto.pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, 64, 'sha512').toString('hex');
   return hash === verify;
 }
 
-/**
- * Generate a JWT token
- */
 export function generateToken(payload: AuthPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+  return jwt.sign(payload, SECRET, { expiresIn: JWT_EXPIRY });
 }
 
 /**
  * Verify and decode a JWT token
  */
 export function verifyToken(token: string): AuthPayload {
-  return jwt.verify(token, JWT_SECRET) as AuthPayload;
+  return jwt.verify(token, SECRET) as AuthPayload;
 }
 
 /**

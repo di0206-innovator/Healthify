@@ -1,4 +1,5 @@
-import fs from 'fs';
+import fs from 'fs/promises';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import type { User, UserPublic, StoredScan, ScanReport, AdminStats } from './types';
@@ -8,13 +9,22 @@ const DATA_DIR = path.join(__dirname, '..', 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const SCANS_FILE = path.join(DATA_DIR, 'scans.json');
 
-// Ensure data directory and files exist
+// In-memory cache
+let usersCache: User[] | null = null;
+let scansCache: StoredScan[] | null = null;
+
+// Write lock (simple promise-based queue)
+let usersWritePromise: Promise<void> = Promise.resolve();
+let scansWritePromise: Promise<void> = Promise.resolve();
+
+/**
+ * Synchronous initialization for directory and seed files.
+ */
 function ensureDataFiles(): void {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!existsSync(DATA_DIR)) {
+    mkdirSync(DATA_DIR, { recursive: true });
   }
-  if (!fs.existsSync(USERS_FILE)) {
-    // Seed with a default admin user
+  if (!existsSync(USERS_FILE)) {
     const adminUser: User = {
       id: crypto.randomUUID(),
       name: 'Admin',
@@ -23,29 +33,59 @@ function ensureDataFiles(): void {
       role: 'admin',
       createdAt: new Date().toISOString(),
     };
-    fs.writeFileSync(USERS_FILE, JSON.stringify([adminUser], null, 2));
+    writeFileSync(USERS_FILE, JSON.stringify([adminUser], null, 2));
     console.log('📦 Created default admin: admin@healthify.com / admin123');
   }
-  if (!fs.existsSync(SCANS_FILE)) {
-    fs.writeFileSync(SCANS_FILE, JSON.stringify([], null, 2));
+  if (!existsSync(SCANS_FILE)) {
+    writeFileSync(SCANS_FILE, JSON.stringify([], null, 2));
   }
 }
 
 ensureDataFiles();
 
-// ---------- User Store ----------
+// ---------- Internal Helpers ----------
 
-function readUsers(): User[] {
+async function getOrLoadUsers(): Promise<User[]> {
+  if (usersCache) return usersCache;
   try {
-    return JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
+    const data = await fs.readFile(USERS_FILE, 'utf-8');
+    usersCache = JSON.parse(data);
+    return usersCache || [];
   } catch {
+    usersCache = [];
     return [];
   }
 }
 
-function writeUsers(users: User[]): void {
-  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+async function getOrLoadScans(): Promise<StoredScan[]> {
+  if (scansCache) return scansCache;
+  try {
+    const data = await fs.readFile(SCANS_FILE, 'utf-8');
+    scansCache = JSON.parse(data);
+    return scansCache || [];
+  } catch {
+    scansCache = [];
+    return [];
+  }
 }
+
+async function persistUsers(users: User[]): Promise<void> {
+  usersCache = users;
+  usersWritePromise = usersWritePromise.then(async () => {
+    await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+  });
+  return usersWritePromise;
+}
+
+async function persistScans(scans: StoredScan[]): Promise<void> {
+  scansCache = scans;
+  scansWritePromise = scansWritePromise.then(async () => {
+    await fs.writeFile(SCANS_FILE, JSON.stringify(scans, null, 2));
+  });
+  return scansWritePromise;
+}
+
+// ---------- User Store ----------
 
 export function toPublicUser(user: User): UserPublic {
   return {
@@ -57,16 +97,18 @@ export function toPublicUser(user: User): UserPublic {
   };
 }
 
-export function findUserByEmail(email: string): User | undefined {
-  return readUsers().find((u) => u.email.toLowerCase() === email.toLowerCase());
+export async function findUserByEmail(email: string): Promise<User | undefined> {
+  const users = await getOrLoadUsers();
+  return users.find((u) => u.email.toLowerCase() === email.toLowerCase());
 }
 
-export function findUserById(id: string): User | undefined {
-  return readUsers().find((u) => u.id === id);
+export async function findUserById(id: string): Promise<User | undefined> {
+  const users = await getOrLoadUsers();
+  return users.find((u) => u.id === id);
 }
 
-export function createUser(name: string, email: string, passwordHash: string): User {
-  const users = readUsers();
+export async function createUser(name: string, email: string, passwordHash: string): Promise<User> {
+  const users = await getOrLoadUsers();
 
   if (users.some((u) => u.email.toLowerCase() === email.toLowerCase())) {
     throw new Error('Email already registered');
@@ -82,30 +124,19 @@ export function createUser(name: string, email: string, passwordHash: string): U
   };
 
   users.push(user);
-  writeUsers(users);
+  await persistUsers(users);
   return user;
 }
 
-export function getAllUsers(): UserPublic[] {
-  return readUsers().map(toPublicUser);
+export async function getAllUsers(): Promise<UserPublic[]> {
+  const users = await getOrLoadUsers();
+  return users.map(toPublicUser);
 }
 
 // ---------- Scan Store ----------
 
-function readScans(): StoredScan[] {
-  try {
-    return JSON.parse(fs.readFileSync(SCANS_FILE, 'utf-8'));
-  } catch {
-    return [];
-  }
-}
-
-function writeScans(scans: StoredScan[]): void {
-  fs.writeFileSync(SCANS_FILE, JSON.stringify(scans, null, 2));
-}
-
-export function saveScan(userId: string, userName: string, report: ScanReport): StoredScan {
-  const scans = readScans();
+export async function saveScan(userId: string, userName: string, report: ScanReport): Promise<StoredScan> {
+  const scans = await getOrLoadScans();
   const storedScan: StoredScan = {
     id: crypto.randomUUID(),
     userId,
@@ -113,30 +144,31 @@ export function saveScan(userId: string, userName: string, report: ScanReport): 
     report: { ...report, id: crypto.randomUUID(), userId },
     createdAt: new Date().toISOString(),
   };
-  scans.unshift(storedScan); // newest first
-  // Keep max 500 scans
+  scans.unshift(storedScan);
   if (scans.length > 500) scans.length = 500;
-  writeScans(scans);
+  await persistScans(scans);
   return storedScan;
 }
 
-export function getScansForUser(userId: string): StoredScan[] {
-  return readScans().filter((s) => s.userId === userId);
+export async function getScansForUser(userId: string): Promise<StoredScan[]> {
+  const scans = await getOrLoadScans();
+  return scans.filter((s) => s.userId === userId);
 }
 
-export function getAllScans(): StoredScan[] {
-  return readScans();
+export async function getAllScans(): Promise<StoredScan[]> {
+  return await getOrLoadScans();
 }
 
-export function getScanById(scanId: string): StoredScan | undefined {
-  return readScans().find((s) => s.id === scanId || s.report.id === scanId);
+export async function getScanById(scanId: string): Promise<StoredScan | undefined> {
+  const scans = await getOrLoadScans();
+  return scans.find((s) => s.id === scanId || s.report.id === scanId);
 }
 
 // ---------- Admin Stats ----------
 
-export function getStats(): AdminStats {
-  const users = readUsers();
-  const scans = readScans();
+export async function getStats(): Promise<AdminStats> {
+  const users = await getOrLoadUsers();
+  const scans = await getOrLoadScans();
 
   const scores = scans.map((s) => s.report.safetyScore);
   const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
