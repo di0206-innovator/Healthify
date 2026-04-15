@@ -34,7 +34,7 @@ export default function IngredientCard({ ingredient, index }: IngredientCardProp
         {/* Header: Name + Severity */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
-            <h3 className="text-2xl font-black text-brutal-black uppercase truncate border-b-4 border-brutal-black pb-1">
+            <h3 className="text-xl sm:text-2xl font-black text-brutal-black uppercase truncate border-b-4 border-brutal-black pb-1">
               {ingredient.ingredient}
             </h3>
             <span className={`brutal-badge ${config.class}`}>
@@ -76,7 +76,7 @@ export default function IngredientCard({ ingredient, index }: IngredientCardProp
 
           {/* Substitute */}
           {ingredient.substitute && (
-            <div className="mt-6 flex flex-col gap-2 bg-brutal-green border-4 border-brutal-black p-4 shadow-[4px_4px_0_0_#1A1A1A] hover:translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#1A1A1A] transition-all">
+            <div className="mt-6 flex flex-col gap-2 bg-brutal-green border-4 border-brutal-black p-3 sm:p-4 hover:translate-x-1 hover:-translate-y-1 transition-all" style={{ boxShadow: 'var(--brutal-shadow)' }}>
               <div className="flex items-center gap-2">
                 <span className="bg-white border-2 border-brutal-black rounded-full px-2 py-1 text-xl drop-shadow-[1px_1px_0_#1A1A1A]">💡</span>
                 <span className="text-lg font-black text-brutal-black uppercase tracking-widest bg-white px-2 border-2 border-brutal-black">

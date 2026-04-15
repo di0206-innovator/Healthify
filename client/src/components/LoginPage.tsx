@@ -42,8 +42,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-8 brutal-card animate-pop-in">
-      <h1 className="text-4xl font-display font-black uppercase text-brutal-black mb-6 text-center shadow-[2px_2px_0_0_#FFD000]">
+    <div className="max-w-md mx-auto mt-10 sm:mt-20 p-6 sm:p-8 brutal-card animate-pop-in">
+      <h1 className="text-3xl sm:text-4xl font-display font-black uppercase text-brutal-black mb-6 text-center shadow-[2px_2px_0_0_#FFD000]">
         Log In
       </h1>
       

@@ -28,10 +28,10 @@ export default function ProgressIndicator({ currentStep }: ProgressIndicatorProp
 
   return (
     <div className="w-full max-w-lg mx-auto py-6 animate-pop-in" id="progress-indicator">
-      <div className="brutal-card p-6 bg-white border-4 border-brutal-black shadow-[8px_8px_0_0_#1A1A1A]">
-        <div className="flex justify-center items-center gap-3 mb-6 bg-brutal-yellow py-2 px-4 border-2 border-brutal-black -rotate-1 shadow-[4px_4px_0_0_#1A1A1A]">
+      <div className="brutal-card p-4 sm:p-6 bg-white border-4 border-brutal-black" style={{ boxShadow: 'var(--brutal-shadow-lg)' }}>
+        <div className="flex justify-center items-center gap-2 sm:gap-3 mb-4 sm:mb-6 bg-brutal-yellow py-2 px-3 sm:px-4 border-2 border-brutal-black -rotate-1" style={{ boxShadow: 'var(--brutal-shadow)' }}>
           <div className="w-3 h-3 border-2 border-brutal-black bg-white animate-pulse" />
-          <span className="text-base font-black text-brutal-black uppercase tracking-widest">
+          <span className="text-sm sm:text-base font-black text-brutal-black uppercase tracking-widest">
             AI Pipeline Active
           </span>
         </div>
@@ -64,7 +64,7 @@ export default function ProgressIndicator({ currentStep }: ProgressIndicatorProp
               </div>
 
               {/* Step label */}
-              <span className={`text-lg font-black uppercase tracking-wide transition-colors
+              <span className={`text-sm sm:text-lg font-black uppercase tracking-wide transition-colors
                 ${status === 'active' ? 'text-brutal-black animate-bounce-slight inline-block' : ''}
                 ${status === 'done' ? 'text-brutal-black' : ''}
                 ${status === 'pending' ? 'text-gray-400' : ''}

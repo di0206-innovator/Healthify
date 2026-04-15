@@ -11,29 +11,29 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-brutal-bg brutal-border-b border-b-4 border-brutal-black transition-transform">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <nav className="sticky top-0 z-50 bg-brutal-bg border-b-4 border-brutal-black transition-transform">
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
         <Link
           to="/"
           className="flex items-center gap-2.5 group hover:-translate-y-0.5 transition-transform"
           id="navbar-logo"
         >
           {/* Logo icon */}
-          <div className="w-10 h-10 rounded-lg bg-brutal-yellow border-4 border-brutal-black flex items-center justify-center shadow-[2px_2px_0_0_#1A1A1A] group-hover:bg-brutal-pink transition-colors">
-            <span className="text-brutal-black font-black text-lg group-hover:animate-wiggle">H</span>
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-brutal-yellow border-3 sm:border-4 border-brutal-black flex items-center justify-center shadow-[2px_2px_0_0_#1A1A1A] group-hover:bg-brutal-pink transition-colors">
+            <span className="text-brutal-black font-black text-base sm:text-lg group-hover:animate-wiggle">H</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-display font-black text-brutal-black leading-tight tracking-tight uppercase">
+            <span className="text-base sm:text-lg font-display font-black text-brutal-black leading-tight tracking-tight uppercase">
               Healthi<span className="text-brutal-pink">fy</span>
             </span>
-            <span className="text-[11px] text-brutal-black font-bold tracking-widest uppercase leading-tight">
+            <span className="text-[10px] sm:text-[11px] text-brutal-black font-bold tracking-widest uppercase leading-tight hidden sm:block">
               Know what you eat
             </span>
           </div>
         </Link>
 
         {/* Right side */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {isAuthenticated ? (
             <>
               {isAdmin && (
@@ -41,22 +41,22 @@ export default function Navbar() {
                   ★ Admin
                 </Link>
               )}
-              <Link to="/history" className="text-sm font-bold border-2 border-brutal-black px-3 py-1 rounded-lg hover:bg-brutal-yellow shadow-[2px_2px_0_0_#1A1A1A] transition-colors">
+              <Link to="/history" className="text-xs sm:text-sm font-bold border-2 border-brutal-black px-2 sm:px-3 py-1 rounded-lg hover:bg-brutal-yellow shadow-[2px_2px_0_0_#1A1A1A] transition-colors">
                 History
               </Link>
               <div className="hidden sm:block text-sm font-bold uppercase border-l-2 border-brutal-black pl-4 py-1">
                 Hi, {user?.name.split(' ')[0]}
               </div>
-              <button onClick={handleLogout} className="text-sm font-bold bg-brutal-black text-white px-3 py-1.5 rounded-lg border-2 border-brutal-black hover:bg-brutal-red transition-colors">
+              <button onClick={handleLogout} className="text-xs sm:text-sm font-bold bg-brutal-black text-white px-2 sm:px-3 py-1.5 rounded-lg border-2 border-brutal-black hover:bg-brutal-red transition-colors">
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="text-sm font-bold text-brutal-black hover:underline hidden sm:block">
+              <Link to="/login" className="text-xs sm:text-sm font-bold text-brutal-black border-2 border-brutal-black px-2 sm:px-3 py-1 rounded-lg hover:bg-brutal-yellow transition-colors">
                 Log In
               </Link>
-              <Link to="/signup" className="text-sm font-bold bg-brutal-green px-4 py-1.5 border-2 border-brutal-black rounded-lg shadow-[2px_2px_0_0_#1A1A1A] hover:bg-brutal-yellow transition-colors hover:translate-y-[-2px]">
+              <Link to="/signup" className="text-xs sm:text-sm font-bold bg-brutal-green px-2 sm:px-4 py-1.5 border-2 border-brutal-black rounded-lg shadow-[2px_2px_0_0_#1A1A1A] hover:bg-brutal-yellow transition-colors hover:translate-y-[-2px]">
                 Sign Up
               </Link>
             </>
@@ -66,7 +66,7 @@ export default function Navbar() {
             href="https://github.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-10 h-10 rounded-lg bg-white border-2 border-brutal-black flex items-center justify-center text-brutal-black hover:bg-brutal-yellow hover:-translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition-all ml-2"
+            className="hidden sm:flex w-10 h-10 rounded-lg bg-white border-2 border-brutal-black items-center justify-center text-brutal-black hover:bg-brutal-yellow hover:-translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition-all ml-2"
             aria-label="GitHub"
             id="github-link"
           >

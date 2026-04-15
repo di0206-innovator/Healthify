@@ -54,8 +54,8 @@ export default function ReportCard({ report, onScanAgain }: ReportCardProps) {
   return (
     <div className="w-full max-w-3xl mx-auto space-y-8 animate-fade-in" id="scan-report">
       {/* Score Card */}
-      <div className="brutal-card p-10 text-center bg-white border-8 border-brutal-black shadow-[8px_8px_0_0_#1A1A1A]">
-        <h2 className="text-3xl font-black text-brutal-black uppercase tracking-widest mb-8 border-b-4 border-brutal-black pb-4 inline-block">
+      <div className="brutal-card p-6 sm:p-10 text-center bg-white border-4 sm:border-8 border-brutal-black" style={{ boxShadow: 'var(--brutal-shadow-lg)' }}>
+        <h2 className="text-2xl sm:text-3xl font-black text-brutal-black uppercase tracking-widest mb-6 sm:mb-8 border-b-4 border-brutal-black pb-4 inline-block">
           Safety Score
         </h2>
         <ScoreCircle
@@ -66,7 +66,7 @@ export default function ReportCard({ report, onScanAgain }: ReportCardProps) {
         />
 
         {/* Meta info */}
-        <div className="mt-8 flex items-center justify-center gap-4 text-sm font-bold text-brutal-black border-4 border-brutal-black inline-flex px-4 py-2 bg-brutal-yellow uppercase">
+        <div className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-xs sm:text-sm font-bold text-brutal-black border-4 border-brutal-black px-3 sm:px-4 py-2 bg-brutal-yellow uppercase" style={{ boxShadow: 'var(--brutal-shadow)' }}>
           <span>📍 {report.country}</span>
           <span className="w-2 h-2 bg-brutal-black rounded-full block"></span>
           <span>🕐 {new Date(report.scannedAt).toLocaleTimeString()}</span>
@@ -76,7 +76,7 @@ export default function ReportCard({ report, onScanAgain }: ReportCardProps) {
       {/* Flagged Ingredients */}
       {flaggedIngredients.length > 0 && (
         <div className="mt-12">
-          <h2 className="text-3xl font-display font-black text-brutal-black mb-6 uppercase tracking-wider inline-block border-2 border-brutal-black px-4 py-2 bg-brutal-red shadow-[4px_4px_0_0_#1A1A1A] -rotate-1">
+          <h2 className="text-2xl sm:text-3xl font-display font-black text-brutal-black mb-6 uppercase tracking-wider inline-block border-2 border-brutal-black px-3 sm:px-4 py-2 bg-brutal-red -rotate-1" style={{ boxShadow: 'var(--brutal-shadow)' }}>
             ⚠️ Flagged
             <span className="ml-3 px-2 py-0.5 bg-white border-2 border-brutal-black rounded-lg text-xl">{flaggedIngredients.length}</span>
           </h2>
@@ -93,7 +93,8 @@ export default function ReportCard({ report, onScanAgain }: ReportCardProps) {
         <div className="mt-12">
           <button
             onClick={() => setShowSafe(!showSafe)}
-            className="flex items-center gap-3 text-xl font-black text-brutal-black bg-white border-4 border-brutal-black px-6 py-4 w-full justify-between hover:bg-brutal-green transition-colors shadow-[4px_4px_0_0_#1A1A1A] active:translate-y-1 active:translate-x-1 active:shadow-[-1px_-1px_0_0_#1A1A1A]"
+            className="flex items-center gap-3 text-lg sm:text-xl font-black text-brutal-black bg-white border-4 border-brutal-black px-4 sm:px-6 py-3 sm:py-4 w-full justify-between hover:bg-brutal-green transition-colors active:translate-y-1 active:translate-x-1"
+            style={{ boxShadow: 'var(--brutal-shadow)' }}
             id="toggle-safe-ingredients"
           >
             <div className="flex items-center gap-3 uppercase">
@@ -136,7 +137,7 @@ export default function ReportCard({ report, onScanAgain }: ReportCardProps) {
       <div className="flex flex-col sm:flex-row gap-5 pt-8">
         <button
           onClick={onScanAgain}
-          className="btn-primary flex-1 flex items-center justify-center gap-3 text-xl uppercase tracking-wide py-5"
+          className="btn-primary flex-1 flex items-center justify-center gap-3 text-lg sm:text-xl uppercase tracking-wide py-4 sm:py-5"
           id="scan-again-button"
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -147,7 +148,7 @@ export default function ReportCard({ report, onScanAgain }: ReportCardProps) {
 
         <button
           onClick={handleShare}
-          className="btn-secondary flex-1 flex items-center justify-center gap-3 text-xl uppercase tracking-wide py-5 bg-[#E0E0E0]"
+          className="btn-secondary flex-1 flex items-center justify-center gap-3 text-lg sm:text-xl uppercase tracking-wide py-4 sm:py-5 bg-[#E0E0E0]"
           id="share-button"
         >
           {copied ? (

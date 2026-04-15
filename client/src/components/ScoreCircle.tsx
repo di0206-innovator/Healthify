@@ -43,29 +43,29 @@ export default function ScoreCircle({ score, grade, harmfulCount, totalCount }: 
     <div className="flex flex-col items-center animate-pop-in" id="score-circle">
       {/* Circle SVG / Stamp */}
       <div 
-        className={`relative w-48 h-48 rounded-full border-8 border-brutal-black flex flex-col items-center justify-center -rotate-3 transition-transform hover:rotate-0 hover:scale-105 ${colors.wrapper}`}
+        className={`relative w-36 h-36 sm:w-48 sm:h-48 rounded-full border-4 sm:border-8 border-brutal-black flex flex-col items-center justify-center -rotate-3 transition-transform hover:rotate-0 hover:scale-105 ${colors.wrapper}`}
         style={{
-          boxShadow: `8px 8px 0px 0px rgba(26,26,26,1)`
+          boxShadow: 'var(--brutal-shadow-lg)'
         }}
       >
-        <span className={`text-[80px] leading-none font-display font-black ${colors.text} drop-shadow-[2px_2px_0_#fff]`}>
+        <span className={`text-[56px] sm:text-[80px] leading-none font-display font-black ${colors.text} drop-shadow-[2px_2px_0_#fff]`}>
           {animatedScore}
         </span>
-        <span className={`text-base font-black uppercase tracking-widest mt-1 ${colors.text} border-t-4 border-brutal-black pt-1 px-4`}>
+        <span className={`text-xs sm:text-base font-black uppercase tracking-widest mt-1 ${colors.text} border-t-4 border-brutal-black pt-1 px-3 sm:px-4`}>
           out of 100
         </span>
       </div>
 
       {/* Grade badge */}
-      <div className={`mt-6 px-6 py-2 border-4 border-brutal-black shadow-[4px_4px_0_0_#1A1A1A] rotate-2 ${colors.badge}`}>
-        <span className={`text-2xl font-black uppercase tracking-widest ${colors.text}`}>
+      <div className={`mt-4 sm:mt-6 px-4 sm:px-6 py-2 border-4 border-brutal-black rotate-2 ${colors.badge}`} style={{ boxShadow: 'var(--brutal-shadow)' }}>
+        <span className={`text-xl sm:text-2xl font-black uppercase tracking-widest ${colors.text}`}>
           Grade {grade}
         </span>
       </div>
 
       {/* Summary */}
-      <p className="mt-5 text-lg font-bold text-brutal-black bg-white border-2 border-brutal-black px-4 py-2 shadow-[2px_2px_0_0_#1A1A1A]">
-        <span className={`text-xl bg-brutal-red text-white px-2 py-0.5 border-2 border-brutal-black mr-1`}>{harmfulCount}</span>
+      <p className="mt-4 sm:mt-5 text-base sm:text-lg font-bold text-brutal-black bg-white border-2 border-brutal-black px-3 sm:px-4 py-2" style={{ boxShadow: 'var(--brutal-shadow)' }}>
+        <span className={`text-lg sm:text-xl bg-brutal-red text-white px-2 py-0.5 border-2 border-brutal-black mr-1`}>{harmfulCount}</span>
         of {totalCount} ingredients flagged
       </p>
     </div>

@@ -52,8 +52,8 @@ export default function AdminPage() {
 
   return (
     <div className="max-w-6xl mx-auto py-10 animate-fade-in">
-      <div className="flex justify-between items-center mb-10 border-b-4 border-brutal-black pb-4">
-        <h1 className="text-5xl font-display font-black text-brutal-black uppercase tracking-tight shadow-[4px_4px_0_0_#A663CC]">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 border-b-4 border-brutal-black pb-4 gap-4">
+        <h1 className="text-3xl sm:text-5xl font-display font-black text-brutal-black uppercase tracking-tight shadow-[4px_4px_0_0_#A663CC]">
           Admin Dashboard
         </h1>
         <Link to="/" className="btn-secondary">Back to Scanner</Link>
@@ -70,15 +70,15 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
               <div className="brutal-card bg-brutal-yellow p-6 flex flex-col justify-center items-center">
                 <h3 className="text-xl font-black uppercase text-brutal-black">Total Users</h3>
-                <p className="text-6xl font-display font-black mt-2 drop-shadow-[2px_2px_0_#fff]">{stats.totalUsers}</p>
+                <p className="text-4xl sm:text-6xl font-display font-black mt-2 drop-shadow-[2px_2px_0_#fff]">{stats.totalUsers}</p>
               </div>
               <div className="brutal-card bg-brutal-green p-6 flex flex-col justify-center items-center">
                 <h3 className="text-xl font-black uppercase text-brutal-black">Total Scans</h3>
-                <p className="text-6xl font-display font-black mt-2 drop-shadow-[2px_2px_0_#fff]">{stats.totalScans}</p>
+                <p className="text-4xl sm:text-6xl font-display font-black mt-2 drop-shadow-[2px_2px_0_#fff]">{stats.totalScans}</p>
               </div>
               <div className="brutal-card bg-brutal-pink p-6 flex flex-col justify-center items-center">
                 <h3 className="text-xl font-black uppercase text-brutal-black">Avg Score</h3>
-                <p className="text-6xl font-display font-black mt-2 drop-shadow-[2px_2px_0_#fff]">{stats.avgScore}</p>
+                <p className="text-4xl sm:text-6xl font-display font-black mt-2 drop-shadow-[2px_2px_0_#fff]">{stats.avgScore}</p>
               </div>
             </div>
           )}
@@ -128,7 +128,8 @@ export default function AdminPage() {
             <div className="bg-brutal-blue text-white p-4 border-b-4 border-brutal-black">
               <h2 className="text-2xl font-black uppercase text-brutal-black drop-shadow-[1px_1px_0_#fff]">Registered Users</h2>
             </div>
-            <table className="w-full text-left font-bold border-collapse">
+            <div className="overflow-x-auto">
+            <table className="w-full text-left font-bold border-collapse min-w-[500px]">
                 <thead>
                   <tr className="border-b-4 border-brutal-black bg-[#E0E0E0]">
                     <th className="p-4 uppercase">Name</th>
@@ -152,6 +153,7 @@ export default function AdminPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
           </div>
         </>
       )}

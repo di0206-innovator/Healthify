@@ -65,7 +65,7 @@ export default function ScanHistory() {
   return (
     <div className="max-w-5xl mx-auto py-10 px-4 sm:px-6 animate-pop-in">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 border-b-4 border-brutal-black pb-4 gap-4">
-        <h1 className="text-4xl sm:text-5xl font-display font-black text-brutal-black uppercase tracking-tight shadow-[4px_4px_0_0_#32E0C4] inline-block bg-white px-2">
+        <h1 className="text-3xl sm:text-5xl font-display font-black text-brutal-black uppercase tracking-tight shadow-[4px_4px_0_0_#32E0C4] inline-block bg-white px-2">
           Your Scan History
         </h1>
         <Link to="/" className="btn-primary py-3">New Scan</Link>
