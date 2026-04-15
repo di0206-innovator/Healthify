@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { runPipeline } from './pipeline';
 import { callGeminiVision } from './agents/ai';
-import { hashPassword, verifyPassword, generateToken, authMiddleware, adminMiddleware } from './auth';
+import { hashPassword, verifyPassword, generateToken, authMiddleware, adminMiddleware, verifyToken } from './auth';
 import {
   findUserByEmail, findUserById, createUser, toPublicUser,
   saveScan, getScansForUser, getAllScans, getScanById, getAllUsers, getStats,
@@ -125,7 +125,6 @@ app.post('/api/scan', async (req, res) => {
     try {
       const authHeader = req.headers.authorization;
       if (authHeader && authHeader.startsWith('Bearer ')) {
-        const { verifyToken } = require('./auth');
         const payload = verifyToken(authHeader.slice(7));
         const user = findUserById(payload.userId);
         if (user) {

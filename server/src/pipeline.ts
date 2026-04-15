@@ -26,18 +26,18 @@ export async function runPipeline(rawText: string, country: string): Promise<Sca
   ]);
 
   // Merge results: bans from Agent 3, substitutes from Agent 4
-  const merged: AnalysedIngredient[] = analysed.map((item, index) => {
-    const banData = withBans[index] || {};
-    const subData = withSubstitutes[index] || {};
+  const merged: AnalysedIngredient[] = analysed.map((item) => {
+    const banData = withBans[item.ingredient] || {};
+    const substitute = withSubstitutes[item.ingredient] || null;
 
     return {
       ingredient: item.ingredient,
       severity: item.severity,
       reason: item.reason,
       category: item.category,
-      bans: banData.bans || [],
-      bannedInSelected: banData.bannedInSelected || false,
-      substitute: subData.substitute || null,
+      bans: Array.isArray(banData.bans) ? banData.bans : [],
+      bannedInSelected: Boolean(banData.bannedInSelected),
+      substitute: typeof substitute === 'string' ? substitute : null,
     };
   });
 

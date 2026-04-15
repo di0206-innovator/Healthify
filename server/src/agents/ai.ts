@@ -20,7 +20,7 @@ export async function callGemini(
   timeoutMs: number = 30000
 ): Promise<any> {
   const model = genAI.getGenerativeModel({
-    model: 'gemini-flash-latest',
+    model: 'gemini-1.5-flash',
     generationConfig: {
       temperature: 0.2,
       maxOutputTokens: 8192,
@@ -62,7 +62,7 @@ export async function callGeminiVision(
   timeoutMs: number = 30000
 ): Promise<string> {
   const model = genAI.getGenerativeModel({
-    model: 'gemini-flash-latest',
+    model: 'gemini-1.5-flash',
     generationConfig: {
       temperature: 0.1,
       maxOutputTokens: 4096,

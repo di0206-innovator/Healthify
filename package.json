@@ -1,7 +1,7 @@
 {
   "name": "healthify",
   "version": "1.0.0",
-  "description": "Healthify – AI-Powered Food Safety Scanner",
+  "description": "Healthify - AI-Powered Food Safety Scanner",
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
