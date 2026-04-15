@@ -21,7 +21,7 @@ export default function ReportCard({ report, onScanAgain }: ReportCardProps) {
 
   const handleShare = async () => {
     const lines = [
-      `🧪 IngredientIQ Safety Report`,
+      `🧪 Healthify Safety Report`,
       `Score: ${report.safetyScore}/100 (Grade ${report.grade})`,
       `${report.harmfulCount} of ${report.totalCount} ingredients flagged`,
       `Country: ${report.country}`,
@@ -31,7 +31,7 @@ export default function ReportCard({ report, onScanAgain }: ReportCardProps) {
         (i) => `• ${i.ingredient} [${i.severity.toUpperCase()}] — ${i.reason}`
       ),
       ``,
-      `Scanned with IngredientIQ — Know what you eat.`,
+      `Scanned with Healthify — Know what you eat.`,
     ];
 
     try {

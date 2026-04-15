@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import type { Request, Response, NextFunction } from 'express';
 import type { AuthPayload } from './types';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'ingredientiq-hackathon-secret-2024';
+const JWT_SECRET = process.env.JWT_SECRET || 'healthify-hackathon-secret-2024';
 const JWT_EXPIRY = '7d';
 
 /**

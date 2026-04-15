@@ -2,7 +2,7 @@
   {
     "id": "e49ac119-035f-4f0c-9b8d-1e1ae65de61a",
     "name": "Admin",
-    "email": "admin@ingredientiq.com",
+    "email": "admin@healthify.com",
     "passwordHash": "cca15cf77b00eff05dbc186a34dcae14:01543c8324cd9af12c45d609ce3d7254924d6224573a89d7afaa4af0b5f87865bb5f86166ca0e10c71c04f06daf949b9c4bf91ecf62749a500547f5439591320",
     "role": "admin",
     "createdAt": "2026-04-11T21:01:08.345Z"

@@ -1,7 +1,7 @@
-# IngredientIQ 🧪
+# Healthify 🧪
 **AI-Powered Food Safety Scanner**
 
-IngredientIQ is a production-ready, agentic AI platform that allows consumers to scan food ingredient lists (text or photos) and receive a comprehensive safety analysis. It flags harmful substances, identifies global regulatory bans, and suggests healthier alternatives using a multi-agent orchestration pipeline.
+Healthify is a production-ready, agentic AI platform that allows consumers to scan food ingredient lists (text or photos) and receive a comprehensive safety analysis. It flags harmful substances, identifies global regulatory bans, and suggests healthier alternatives using a multi-agent orchestration pipeline.
 
 Built to win hackathons — featuring a **Neo-Brutalist 2D UI**, local JSON-based auth/database system, an admin dashboard, and user scan history.
 
@@ -9,7 +9,7 @@ Built to win hackathons — featuring a **Neo-Brutalist 2D UI**, local JSON-base
 
 ## 🏗️ Agentic AI Architecture
 
-IngredientIQ uses a **4-Agent Sequential & Parallel Pipeline** powered by `gemini-1.5-flash`. Instead of relying on one massive, slow, and hallucination-prone prompt, the workload is horizontally split across four specialized agents.
+Healthify uses a **4-Agent Sequential & Parallel Pipeline** powered by `gemini-1.5-flash`. Instead of relying on one massive, slow, and hallucination-prone prompt, the workload is horizontally split across four specialized agents.
 
 ```mermaid
 graph TD
@@ -29,7 +29,7 @@ graph TD
     
     Merge --> Score[Score Calculator]
     Score --> Output([Final Scan Report])
-
+ 
     classDef agent fill:#FFD000,stroke:#1A1A1A,stroke-width:4px,color:#1A1A1A,font-weight:bold;
     classDef io fill:#32E0C4,stroke:#1A1A1A,stroke-width:4px,color:#1A1A1A,font-weight:bold;
     classDef logic fill:#E0E0E0,stroke:#1A1A1A,stroke-width:4px,color:#1A1A1A,font-weight:bold;
@@ -90,7 +90,7 @@ You can run the backend and frontend simultaneously.
 ```bash
 npm run dev:server
 ```
-*(On first run, the server automatically generates a default admin account: `admin@ingredientiq.com` / password: `admin123`)*
+*(On first run, the server automatically generates a default admin account: `admin@healthify.com` / password: `admin123`)*
 
 **Start the Frontend (Port 5173):**
 *In a second terminal window:*

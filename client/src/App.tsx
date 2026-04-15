@@ -26,7 +26,7 @@ export default function App() {
       <footer className="border-t-4 border-brutal-black bg-white mt-auto">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 font-bold uppercase tracking-wider">
           <p className="text-xs text-brutal-black">
-            © {new Date().getFullYear()} IngredientIQ
+            © {new Date().getFullYear()} Healthify
           </p>
           <p className="text-[10px] text-brutal-black bg-brutal-yellow px-3 py-1 border-2 border-brutal-black rounded-md shadow-[1px_1px_0_0_#1A1A1A]">
             AI-POWERED • NOT MEDICAL ADVICE

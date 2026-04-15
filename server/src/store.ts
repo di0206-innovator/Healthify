@@ -18,13 +18,13 @@ function ensureDataFiles(): void {
     const adminUser: User = {
       id: crypto.randomUUID(),
       name: 'Admin',
-      email: 'admin@ingredientiq.com',
+      email: 'admin@healthify.com',
       passwordHash: hashPassword('admin123'),
       role: 'admin',
       createdAt: new Date().toISOString(),
     };
     fs.writeFileSync(USERS_FILE, JSON.stringify([adminUser], null, 2));
-    console.log('📦 Created default admin: admin@ingredientiq.com / admin123');
+    console.log('📦 Created default admin: admin@healthify.com / admin123');
   }
   if (!fs.existsSync(SCANS_FILE)) {
     fs.writeFileSync(SCANS_FILE, JSON.stringify([], null, 2));

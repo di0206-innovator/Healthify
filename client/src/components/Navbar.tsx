@@ -20,11 +20,11 @@ export default function Navbar() {
         >
           {/* Logo icon */}
           <div className="w-10 h-10 rounded-lg bg-brutal-yellow border-4 border-brutal-black flex items-center justify-center shadow-[2px_2px_0_0_#1A1A1A] group-hover:bg-brutal-pink transition-colors">
-            <span className="text-brutal-black font-black text-lg group-hover:animate-wiggle">IQ</span>
+            <span className="text-brutal-black font-black text-lg group-hover:animate-wiggle">H</span>
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-display font-black text-brutal-black leading-tight tracking-tight uppercase">
-              Ingredient<span className="text-brutal-pink">IQ</span>
+              Healthi<span className="text-brutal-pink">fy</span>
             </span>
             <span className="text-[11px] text-brutal-black font-bold tracking-widest uppercase leading-tight">
               Know what you eat

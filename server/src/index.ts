@@ -233,6 +233,6 @@ app.get('/api/admin/users', authMiddleware, adminMiddleware, (_req, res) => {
 
 // ========== Start Server ==========
 app.listen(PORT, () => {
-  console.log(`🧪 IngredientIQ server running on http://localhost:${PORT}`);
-  console.log(`🔑 Default admin: admin@ingredientiq.com / admin123`);
+  console.log(`🧪 Healthify server running on http://localhost:${PORT}`);
+  console.log(`🔑 Default admin: admin@healthify.com / admin123`);
 });

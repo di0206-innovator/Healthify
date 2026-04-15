@@ -1,7 +1,7 @@
 {
-  "name": "ingredientiq-server",
+  "name": "healthify-server",
   "version": "1.0.0",
-  "description": "IngredientIQ AI-Powered Food Safety Scanner - Backend",
+  "description": "Healthify AI-Powered Food Safety Scanner - Backend",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
