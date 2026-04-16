@@ -1,1 +1,164 @@
-[]
+[
+  {
+    "id": "3593033c-ba9b-417d-a2ce-35aadafe640a",
+    "userId": "ec973948-ef5f-457c-8293-2087ce4315a8",
+    "userName": "Admin",
+    "report": {
+      "ingredients": [
+        {
+          "ingredient": "Palm Oil",
+          "severity": "low",
+          "reason": "High in saturated fat, which can contribute to increased LDL cholesterol levels when consumed in excess. Its production also raises environmental concerns.",
+          "category": "Edible oil",
+          "bans": [],
+          "bannedInSelected": false,
+          "substitute": null
+        },
+        {
+          "ingredient": "BHA",
+          "severity": "medium",
+          "reason": "Classified as a possible human carcinogen by the IARC and has shown tumor-promoting effects in animal studies. It can also act as an endocrine disruptor.",
+          "category": "Antioxidant, preservative",
+          "bans": [
+            "EU (restricted)",
+            "Japan (restricted)"
+          ],
+          "bannedInSelected": false,
+          "substitute": "Tocopherols (Vitamin E), Rosemary extract, Ascorbic acid (Vitamin C)"
+        }
+      ],
+      "safetyScore": 63,
+      "grade": "C",
+      "totalCount": 2,
+      "harmfulCount": 1,
+      "country": "India",
+      "scannedAt": "2026-04-16T18:07:10.927Z",
+      "inputText": "Palm Oil, BHA",
+      "id": "5e46b72d-38f4-4b4d-b829-53fc0b5feb43",
+      "userId": "ec973948-ef5f-457c-8293-2087ce4315a8"
+    },
+    "createdAt": "2026-04-16T18:07:10.928Z"
+  },
+  {
+    "id": "a3e36af4-0d4c-4d29-814b-c9d0af9fcc6e",
+    "userId": "ec973948-ef5f-457c-8293-2087ce4315a8",
+    "userName": "Admin",
+    "report": {
+      "ingredients": [
+        {
+          "ingredient": "Palm Oil",
+          "severity": "low",
+          "reason": "High in saturated fats, which can contribute to increased LDL cholesterol levels when consumed in excess.",
+          "category": "Edible oil, fat",
+          "bans": [],
+          "bannedInSelected": false,
+          "substitute": null
+        },
+        {
+          "ingredient": "BHA",
+          "severity": "medium",
+          "reason": "Classified as 'reasonably anticipated to be a human carcinogen' by the U.S. National Toxicology Program. Concerns exist regarding its potential endocrine-disrupting effects and tumor promotion in animal studies at high doses.",
+          "category": "Antioxidant, preservative",
+          "bans": [],
+          "bannedInSelected": false,
+          "substitute": "Tocopherols (Vitamin E)"
+        }
+      ],
+      "safetyScore": 63,
+      "grade": "C",
+      "totalCount": 2,
+      "harmfulCount": 1,
+      "country": "India",
+      "scannedAt": "2026-04-16T18:02:47.027Z",
+      "inputText": "Palm Oil, BHA",
+      "id": "6b20ac72-214e-4550-b29e-1cd9a23e3758",
+      "userId": "ec973948-ef5f-457c-8293-2087ce4315a8"
+    },
+    "createdAt": "2026-04-16T18:02:47.028Z"
+  },
+  {
+    "id": "d037c837-3623-47ad-96ed-faa12e809dfa",
+    "userId": "ec973948-ef5f-457c-8293-2087ce4315a8",
+    "userName": "Admin",
+    "report": {
+      "ingredients": [
+        {
+          "ingredient": "Palm Oil",
+          "severity": "low",
+          "reason": "High in saturated fats, which can contribute to increased LDL cholesterol levels when consumed in excess, potentially impacting cardiovascular health.",
+          "category": "Edible oil, fat",
+          "bans": [],
+          "bannedInSelected": false,
+          "substitute": null
+        },
+        {
+          "ingredient": "BHA",
+          "severity": "medium",
+          "reason": "Butylated Hydroxyanisole (BHA) is classified as a possible human carcinogen by some organizations and an endocrine disruptor. Studies have shown tumor promotion in animal models at high doses.",
+          "category": "Antioxidant, preservative",
+          "bans": [],
+          "bannedInSelected": false,
+          "substitute": "Tocopherols (Vitamin E), Rosemary extract, Ascorbic acid (Vitamin C)"
+        }
+      ],
+      "safetyScore": 63,
+      "grade": "C",
+      "totalCount": 2,
+      "harmfulCount": 1,
+      "country": "India",
+      "scannedAt": "2026-04-16T17:59:10.236Z",
+      "inputText": "Palm Oil, BHA",
+      "id": "aeb65378-0650-4b5c-97f5-eaae45fbb72b",
+      "userId": "ec973948-ef5f-457c-8293-2087ce4315a8"
+    },
+    "createdAt": "2026-04-16T17:59:10.236Z"
+  },
+  {
+    "id": "86771c1f-b166-4a6f-8ee8-60012162c93f",
+    "userId": "ec973948-ef5f-457c-8293-2087ce4315a8",
+    "userName": "Admin",
+    "report": {
+      "ingredients": [
+        {
+          "ingredient": "Palm Oil",
+          "severity": "low",
+          "reason": "High in saturated fat, which can contribute to increased LDL cholesterol levels when consumed in excess. Environmental concerns regarding deforestation are also associated with its production.",
+          "category": "Edible oil, fat",
+          "bans": [],
+          "bannedInSelected": false,
+          "substitute": null
+        },
+        {
+          "ingredient": "High Fructose Corn Syrup",
+          "severity": "medium",
+          "reason": "Excessive consumption is linked to increased risk of obesity, type 2 diabetes, and non-alcoholic fatty liver disease due to its high fructose content and rapid absorption.",
+          "category": "Sweetener",
+          "bans": [],
+          "bannedInSelected": false,
+          "substitute": "Honey, Maple Syrup, Stevia"
+        },
+        {
+          "ingredient": "BHA",
+          "severity": "high",
+          "reason": "Classified as a possible human carcinogen by some agencies and has been shown to cause tumors in animal studies. It may also act as an endocrine disruptor.",
+          "category": "Antioxidant, preservative",
+          "bans": [
+            "Japan"
+          ],
+          "bannedInSelected": false,
+          "substitute": "Vitamin E (Tocopherols), Rosemary Extract, Ascorbic Acid"
+        }
+      ],
+      "safetyScore": 42,
+      "grade": "D",
+      "totalCount": 3,
+      "harmfulCount": 2,
+      "country": "India",
+      "scannedAt": "2026-04-16T17:55:44.368Z",
+      "inputText": "Palm Oil, High Fructose Corn Syrup, BHA",
+      "id": "06dae1f5-9e18-4939-b5e9-8e5451bafd8b",
+      "userId": "ec973948-ef5f-457c-8293-2087ce4315a8"
+    },
+    "createdAt": "2026-04-16T17:55:44.368Z"
+  }
+]

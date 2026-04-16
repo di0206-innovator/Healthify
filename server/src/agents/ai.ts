@@ -3,17 +3,25 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const apiKey = process.env.GEMINI_API_KEY;
-if (!apiKey || apiKey === 'your_key_here') {
-  console.warn('⚠️  GEMINI_API_KEY is not set. Please set it in server/.env');
-}
+let genAIInstance: GoogleGenerativeAI | null = null;
 
-const genAI = new GoogleGenerativeAI(apiKey || '');
+function getGenAI(): GoogleGenerativeAI {
+  if (genAIInstance) return genAIInstance;
+  
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'your_key_here') {
+    throw new Error('❌ GEMINI_API_KEY is missing. Please check server/.env');
+  }
+  
+  console.log('✅ AI Client Initialized with API Key starting with:', apiKey.substring(0, 8));
+  genAIInstance = new GoogleGenerativeAI(apiKey);
+  return genAIInstance;
+}
 
 /**
  * Helper for exponential backoff retries on transient errors (429, 500, 503)
  */
-async function withRetry<T>(fn: () => Promise<T>, retries = 3, initialDelay = 1000): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, retries = 3, initialDelay = 2000): Promise<T> {
   let lastError: any;
   for (let i = 0; i <= retries; i++) {
     try {
@@ -46,14 +54,14 @@ export async function callGemini(
   timeoutMs: number = 30000
 ): Promise<any> {
   return withRetry(async () => {
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
-    generationConfig: {
-      temperature: 0.1,
-      maxOutputTokens: 2048,
-      responseMimeType: 'application/json',
-    },
-  });
+    const model = getGenAI().getGenerativeModel({
+      model: 'gemini-2.0-flash',
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 2048,
+        responseMimeType: 'application/json',
+      },
+    });
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -91,13 +99,13 @@ export async function callGeminiVision(
   timeoutMs: number = 30000
 ): Promise<string> {
   return withRetry(async () => {
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
-    generationConfig: {
-      temperature: 0.1,
-      maxOutputTokens: 4096,
-    },
-  });
+    const model = getGenAI().getGenerativeModel({
+      model: 'gemini-2.0-flash',
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 4096,
+      },
+    });
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);

@@ -31,8 +31,9 @@ export default function ScanHistory() {
         
         const data = await res.json();
         setScans(data.scans);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to load history';
+        setError(message);
       } finally {
         setLoadingScans(false);
       }

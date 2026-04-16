@@ -24,18 +24,35 @@ function ensureDataFiles(): void {
   if (!existsSync(DATA_DIR)) {
     mkdirSync(DATA_DIR, { recursive: true });
   }
+
+  const defaultAdmin: User = {
+    id: crypto.randomUUID(),
+    name: 'Admin',
+    email: 'admin@healthify.com',
+    passwordHash: hashPassword('admin123'),
+    role: 'admin',
+    createdAt: new Date().toISOString(),
+  };
+
   if (!existsSync(USERS_FILE)) {
-    const adminUser: User = {
-      id: crypto.randomUUID(),
-      name: 'Admin',
-      email: 'admin@healthify.com',
-      passwordHash: hashPassword('admin123'),
-      role: 'admin',
-      createdAt: new Date().toISOString(),
-    };
-    writeFileSync(USERS_FILE, JSON.stringify([adminUser], null, 2));
-    console.log('📦 Created default admin: admin@healthify.com / admin123');
+    writeFileSync(USERS_FILE, JSON.stringify([defaultAdmin], null, 2));
+    console.log('📦 Created initial users file with default admin: admin@healthify.com / admin123');
+  } else {
+    // Audit check: ensure at least one admin exists
+    try {
+      const data = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
+      const hasAdmin = Array.isArray(data) && data.some((u: any) => u.role === 'admin');
+      if (!hasAdmin) {
+        data.push(defaultAdmin);
+        writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
+        console.log('📦 Added missing default admin account.');
+      }
+    } catch (e) {
+      console.error('⚠️ Could not audit users file, resetting to default admin.');
+      writeFileSync(USERS_FILE, JSON.stringify([defaultAdmin], null, 2));
+    }
   }
+
   if (!existsSync(SCANS_FILE)) {
     writeFileSync(SCANS_FILE, JSON.stringify([], null, 2));
   }

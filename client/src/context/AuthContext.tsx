@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import type { User, AuthState } from '../types';
 
 interface AuthContextType extends AuthState {
@@ -8,40 +8,37 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AuthState>({
+function getInitialState(): AuthState {
+  const storedToken = localStorage.getItem('token');
+  const storedUser = localStorage.getItem('user');
+
+  if (storedToken && storedUser) {
+    try {
+      const user = JSON.parse(storedUser) as User;
+      return {
+        user,
+        token: storedToken,
+        isAuthenticated: true,
+        isAdmin: user.role === 'admin',
+        isLoading: false,
+      };
+    } catch {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
+  }
+
+  return {
     user: null,
     token: null,
     isAuthenticated: false,
     isAdmin: false,
-    isLoading: true,
-  });
+    isLoading: false,
+  };
+}
 
-  useEffect(() => {
-    // Check local storage on mount
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-
-    if (storedToken && storedUser) {
-      try {
-        const user = JSON.parse(storedUser) as User;
-        setState({
-          user,
-          token: storedToken,
-          isAuthenticated: true,
-          isAdmin: user.role === 'admin',
-          isLoading: false,
-        });
-      } catch (e) {
-        // Invalid stored user
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setState((s) => ({ ...s, isLoading: false }));
-      }
-    } else {
-      setState((s) => ({ ...s, isLoading: false }));
-    }
-  }, []);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [state, setState] = useState<AuthState>(getInitialState);
 
   const login = (token: string, user: User) => {
     localStorage.setItem('token', token);
@@ -74,6 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Exported separately so react-refresh can detect only component exports
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

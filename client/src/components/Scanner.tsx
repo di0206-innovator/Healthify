@@ -6,13 +6,21 @@ import ProgressIndicator from './ProgressIndicator';
 
 interface ScannerProps {
   onReportReady: (report: ScanReport) => void;
+  ingredientText: string;
+  setIngredientText: (text: string) => void;
+  country: string;
+  setCountry: (country: string) => void;
 }
 
-export default function Scanner({ onReportReady }: ScannerProps) {
+export default function Scanner({ 
+  onReportReady, 
+  ingredientText, 
+  setIngredientText, 
+  country, 
+  setCountry 
+}: ScannerProps) {
   const { token } = useAuth();
   
-  const [ingredientText, setIngredientText] = useState(SAMPLE_INGREDIENTS);
-  const [country, setCountry] = useState('India');
   const [currentStep, setCurrentStep] = useState<ScanStep>('idle');
   const [error, setError] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -47,8 +55,9 @@ export default function Scanner({ onReportReady }: ScannerProps) {
 
         const data = await res.json();
         setIngredientText(data.ingredientText);
-      } catch (err: any) {
-        setError(err.message || 'Failed to extract text from image');
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to extract text from image';
+        setError(message);
       } finally {
         setOcrLoading(false);
       }
@@ -114,10 +123,11 @@ export default function Scanner({ onReportReady }: ScannerProps) {
       const report: ScanReport = await res.json();
       setCurrentStep('done');
       onReportReady(report);
-    } catch (err: any) {
+    } catch (err: unknown) {
       timers.forEach(clearTimeout);
       setCurrentStep('error');
-      setError(err.message || 'An unexpected error occurred. Please try again.');
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+      setError(message);
     }
   };
 

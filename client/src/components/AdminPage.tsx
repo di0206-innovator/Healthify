@@ -40,8 +40,9 @@ export default function AdminPage() {
         setStats(statsData);
         setScans(scansData.scans);
         setUsers(usersData.users);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'An error occurred';
+        setError(message);
       }
     };
 

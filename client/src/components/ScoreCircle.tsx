@@ -20,7 +20,7 @@ export default function ScoreCircle({ score, grade, harmfulCount, totalCount }: 
 
   // Animate score number
   useEffect(() => {
-    let start = 0;
+    const start = 0;
     const end = score;
     const duration = 1500;
     const startTime = performance.now();

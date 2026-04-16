@@ -35,8 +35,9 @@ export default function SignupPage() {
 
       login(data.token, data.user);
       navigate('/');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Signup failed';
+      setError(message);
     } finally {
       setLoading(false);
     }
