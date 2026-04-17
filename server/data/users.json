@@ -1,10 +1,10 @@
 [
   {
-    "id": "ec973948-ef5f-457c-8293-2087ce4315a8",
+    "id": "4e011396-a9be-425c-beb3-5083eeb6c6af",
     "name": "Admin",
     "email": "admin@healthify.com",
-    "passwordHash": "c19d4a089673f8615df2838fe97fe2a5:24b8f97fb7b0d3f6afb8f543dcd601a49854c44ad9e8c3d95ac563feba90f1bdabcf8babf28c06c12ad607e7ba1e250ac41e64e13a9aac0fc886a3a872db18a9",
+    "passwordHash": "c2d38d8a750801f79674dba401344468:915bbfa9bd3643288ef46f1361771b343041636ffa707af4bc11ff501ab2dc3bb69f3c5cc5fc7b210ae4a6420120199afbae8224797c035fbfff66689b9da7c8",
     "role": "admin",
-    "createdAt": "2026-04-16T17:44:27.666Z"
+    "createdAt": "2026-04-17T09:35:12.432Z"
   }
 ]
