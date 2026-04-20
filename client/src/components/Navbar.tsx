@@ -44,6 +44,9 @@ export default function Navbar() {
               <Link to="/history" className="text-xs sm:text-sm font-bold border-2 border-brutal-black px-2 sm:px-3 py-1 rounded-lg hover:bg-brutal-yellow shadow-[2px_2px_0_0_#1A1A1A] transition-colors">
                 History
               </Link>
+              <Link to="/my-data" className="hidden sm:inline-flex text-xs sm:text-sm font-bold border-2 border-brutal-black px-2 sm:px-3 py-1 rounded-lg hover:bg-brutal-blue shadow-[2px_2px_0_0_#1A1A1A] transition-colors">
+                My Data
+              </Link>
               <div className="hidden sm:block text-sm font-bold uppercase border-l-2 border-brutal-black pl-4 py-1">
                 Hi, {user?.name.split(' ')[0]}
               </div>

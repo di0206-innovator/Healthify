@@ -32,7 +32,7 @@ export default function LoginPage() {
         throw new Error(data.error || 'Login failed');
       }
 
-      login(data.token, data.user);
+      login(data.token, data.user, data.refreshToken);
       navigate('/');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Login failed';

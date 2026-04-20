@@ -1,7 +1,4 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 let genAIInstance: GoogleGenerativeAI | null = null;
 
@@ -46,98 +43,127 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 3, initialDelay = 20
 
 /**
  * Call Gemini with a system prompt and user input, expecting JSON back.
- * Includes exponential backoff for resilience.
+ * Includes exponential backoff for resilience and fallback between verified models.
  */
 export async function callGemini(
   systemPrompt: string,
   userInput: string,
-  timeoutMs: number = 30000
+  timeoutMs: number = 40000
 ): Promise<any> {
-  return withRetry(async () => {
-    const model = getGenAI().getGenerativeModel({
-      model: 'gemini-2.0-flash',
-      generationConfig: {
-        temperature: 0.1,
-        maxOutputTokens: 2048,
-        responseMimeType: 'application/json',
-      },
-    });
+  const models = [
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-flash-latest',
+    'gemini-3.1-flash-lite-preview'
+  ];
+  let lastError: any;
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
+  for (const modelName of models) {
     try {
-      const result = await model.generateContent({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: `${systemPrompt}\n\n---\n\nInput:\n${userInput}` }],
+      return await withRetry(async () => {
+        const model = getGenAI().getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 2048,
+            responseMimeType: 'application/json',
           },
-        ],
-      });
+        });
 
-      clearTimeout(timeout);
-      const text = result.response.text();
-      return parseJsonResponse(text);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+          const result = await model.generateContent({
+            contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\n---\n\nInput:\n${userInput}` }] }],
+          });
+
+          clearTimeout(timeout);
+          return parseJsonResponse(result.response.text());
+        } catch (error: any) {
+          clearTimeout(timeout);
+          throw error;
+        }
+      }, 2);
     } catch (error: any) {
-      clearTimeout(timeout);
-      if (error.name === 'AbortError') {
-        throw new Error('Agent call timed out after ' + timeoutMs + 'ms');
+      lastError = error;
+      const status = error?.status || error?.response?.status;
+      const shouldFallback = status === 429 || status === 404 || status === 503;
+      
+      if (shouldFallback && modelName !== models[models.length - 1]) {
+        console.warn(`⚠️  Error ${status} for ${modelName}. Falling back to ${models[models.indexOf(modelName) + 1]}...`);
+        continue;
       }
-      throw error;
+      break;
     }
-  });
+  }
+  throw lastError;
 }
 
 /**
- * Call Gemini with vision capabilities for image OCR.
+ * Call Gemini with vision capabilities for image OCR, with fallback.
  */
 export async function callGeminiVision(
   prompt: string,
   imageBase64: string,
   mimeType: string = 'image/jpeg',
-  timeoutMs: number = 30000
+  timeoutMs: number = 60000
 ): Promise<string> {
-  return withRetry(async () => {
-    const model = getGenAI().getGenerativeModel({
-      model: 'gemini-2.0-flash',
-      generationConfig: {
-        temperature: 0.1,
-        maxOutputTokens: 4096,
-      },
-    });
+  const models = [
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-flash-latest',
+    'gemini-3.1-flash-lite-preview'
+  ];
+  let lastError: any;
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
+  for (const modelName of models) {
     try {
-      const result = await model.generateContent({
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              { text: prompt },
+      return await withRetry(async () => {
+        const model = getGenAI().getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 2048,
+          },
+        });
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+          const result = await model.generateContent({
+            contents: [
               {
-                inlineData: {
-                  mimeType,
-                  data: imageBase64,
-                },
+                role: 'user',
+                parts: [
+                  { text: prompt },
+                  { inlineData: { mimeType, data: imageBase64 } },
+                ],
               },
             ],
-          },
-        ],
-      });
+          });
 
-      clearTimeout(timeout);
-      return result.response.text().trim();
+          clearTimeout(timeout);
+          return result.response.text().trim();
+        } catch (error: any) {
+          clearTimeout(timeout);
+          throw error;
+        }
+      }, 1);
     } catch (error: any) {
-      clearTimeout(timeout);
-      if (error.name === 'AbortError') {
-        throw new Error('Vision call timed out after ' + timeoutMs + 'ms');
+      lastError = error;
+      const status = error?.status || error?.response?.status;
+      const shouldFallback = status === 429 || status === 404 || status === 503;
+
+      if (shouldFallback && modelName !== models[models.length - 1]) {
+        console.warn(`⚠️  Error ${status} for ${modelName} (Vision). Falling back to ${models[models.indexOf(modelName) + 1]}...`);
+        continue;
       }
-      throw error;
+      break;
     }
-  });
+  }
+  throw lastError;
 }
 
 /**

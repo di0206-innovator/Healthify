@@ -3,6 +3,8 @@ import { COUNTRIES, SAMPLE_INGREDIENTS } from '../types';
 import type { ScanStep, ScanReport } from '../types';
 import { useAuth } from '../context/AuthContext';
 import ProgressIndicator from './ProgressIndicator';
+import { parseApiError, getActionLabel, getActionIcon, compressImage } from '../utils/errors';
+import type { ApiError } from '../utils/errors';
 
 interface ScannerProps {
   onReportReady: (report: ScanReport) => void;
@@ -22,7 +24,8 @@ export default function Scanner({
   const { token } = useAuth();
   
   const [currentStep, setCurrentStep] = useState<ScanStep>('idle');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [ocrLoading, setOcrLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -33,36 +36,42 @@ export default function Scanner({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Show preview
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const base64 = event.target?.result as string;
-      setImagePreview(base64);
-      setOcrLoading(true);
-      setError(null);
+    // Validate file type
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setError({ message: 'Please upload a JPEG, PNG, or WebP image.', code: 'INVALID_FORMAT', action: 'change-file' });
+      return;
+    }
 
-      try {
-        const res = await fetch('/api/ocr', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageBase64: base64 }),
-        });
+    setOcrLoading(true);
+    setError(null);
+    setErrorMessage(null);
 
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error || 'OCR failed');
-        }
+    try {
+      // Compress image before upload (max 1MB, max 1920px)
+      const compressedBase64 = await compressImage(file, 1, 1920);
+      setImagePreview(compressedBase64);
 
-        const data = await res.json();
-        setIngredientText(data.ingredientText);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Failed to extract text from image';
-        setError(message);
-      } finally {
-        setOcrLoading(false);
+      const res = await fetch('/api/ocr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: compressedBase64 }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        const apiErr = parseApiError(errData);
+        setError(apiErr);
+        return;
       }
-    };
-    reader.readAsDataURL(file);
+
+      const data = await res.json();
+      setIngredientText(data.ingredientText);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to extract text from image';
+      setErrorMessage(message);
+    } finally {
+      setOcrLoading(false);
+    }
   };
 
   const clearImage = () => {
@@ -74,11 +83,12 @@ export default function Scanner({
 
   const handleScan = async () => {
     if (!ingredientText.trim()) {
-      setError('Please enter or upload an ingredient list');
+      setErrorMessage('Please enter or upload an ingredient list');
       return;
     }
 
     setError(null);
+    setErrorMessage(null);
     setCurrentStep('parsing');
 
     // Simulate step progression with timing
@@ -116,20 +126,64 @@ export default function Scanner({
       timers.forEach(clearTimeout);
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Scan failed');
+        let errData;
+        try {
+          errData = await res.json();
+        } catch {
+          errData = { error: `Server Error (${res.status})` };
+        }
+        const apiErr = parseApiError(errData);
+        setError(apiErr);
+        setCurrentStep('error');
+        return;
       }
 
-      const report: ScanReport = await res.json();
-      setCurrentStep('done');
-      onReportReady(report);
+      try {
+        const report: ScanReport = await res.json();
+        setCurrentStep('done');
+        onReportReady(report);
+      } catch (err) {
+        console.error('Failed to parse scan report:', err);
+        setError({ message: 'Received an invalid response from the server. Please try again.', code: 'PARSE_ERROR', action: 'retry' });
+        setCurrentStep('error');
+      }
     } catch (err: unknown) {
       timers.forEach(clearTimeout);
       setCurrentStep('error');
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
-      setError(message);
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
+      setErrorMessage(message);
     }
   };
+
+  // Error action handlers
+  const handleErrorAction = () => {
+    if (!error) return;
+    switch (error.action) {
+      case 'retry':
+        setError(null);
+        setErrorMessage(null);
+        setCurrentStep('idle');
+        handleScan();
+        break;
+      case 'change-file':
+        setError(null);
+        setErrorMessage(null);
+        clearImage();
+        setCurrentStep('idle');
+        break;
+      case 'retry-later':
+        setError(null);
+        setErrorMessage(null);
+        setCurrentStep('idle');
+        break;
+      default:
+        setError(null);
+        setErrorMessage(null);
+        setCurrentStep('idle');
+    }
+  };
+
+  const activeError = error || (errorMessage ? { message: errorMessage, code: 'UNKNOWN', action: 'retry' as const } : null);
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6" id="scanner">
@@ -229,16 +283,28 @@ export default function Scanner({
           </div>
         </div>
 
-        {/* Error */}
-        {error && (
-          <div className="flex items-start gap-3 bg-brutal-red border-4 border-brutal-black rounded-xl px-5 py-4 shadow-[4px_4px_0_0_#1A1A1A] animate-pop-in" id="error-message">
-            <svg className="w-8 h-8 text-brutal-black flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-            </svg>
-            <div>
-              <p className="text-xl font-black text-brutal-black uppercase">Oops! Error</p>
-              <p className="text-base font-bold text-brutal-black mt-1">{error}</p>
+        {/* Error Display with Contextual Actions */}
+        {activeError && (
+          <div className="bg-brutal-red border-4 border-brutal-black rounded-xl px-5 py-4 shadow-[4px_4px_0_0_#1A1A1A] animate-pop-in space-y-3" id="error-message">
+            <div className="flex items-start gap-3">
+              <svg className="w-8 h-8 text-brutal-black flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+              <div>
+                <p className="text-xl font-black text-brutal-black uppercase">Oops! Error</p>
+                <p className="text-base font-bold text-brutal-black mt-1">{activeError.message}</p>
+              </div>
             </div>
+            {/* Contextual action button */}
+            {error && (
+              <button
+                onClick={handleErrorAction}
+                className="btn-secondary w-full flex items-center justify-center gap-2 text-base uppercase tracking-wide"
+              >
+                <span>{getActionIcon(error.action)}</span>
+                <span>{getActionLabel(error.action)}</span>
+              </button>
+            )}
           </div>
         )}
 

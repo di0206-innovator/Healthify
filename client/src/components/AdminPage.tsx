@@ -3,6 +3,13 @@ import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import type { AdminStats, StoredScan, UserPublic } from '../types';
 
+interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  pages: number;
+}
+
 export default function AdminPage() {
   const { token, isAdmin, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -12,42 +19,54 @@ export default function AdminPage() {
   const [users, setUsers] = useState<UserPublic[]>([]);
   const [error, setError] = useState('');
 
+  // Pagination state
+  const [scanPage, setScanPage] = useState(1);
+  const [userPage, setUserPage] = useState(1);
+  const [scanPagination, setScanPagination] = useState<PaginationInfo | null>(null);
+  const [userPagination, setUserPagination] = useState<PaginationInfo | null>(null);
+  const ITEMS_PER_PAGE = 20;
+
   useEffect(() => {
     if (!isLoading && !isAdmin) {
       navigate('/');
     }
   }, [isAdmin, isLoading, navigate]);
 
+  // Fetch stats once
   useEffect(() => {
     if (!token || !isAdmin) return;
-
-    const fetchData = async () => {
-      try {
-        const headers = { Authorization: `Bearer ${token}` };
-        
-        const [statsRes, scansRes, usersRes] = await Promise.all([
-          fetch('/api/admin/stats', { headers }),
-          fetch('/api/admin/scans', { headers }),
-          fetch('/api/admin/users', { headers }),
-        ]);
-
-        if (!statsRes.ok) throw new Error('Failed to fetch admin data');
-
-        const [statsData, scansData, usersData] = await Promise.all([
-          statsRes.json(), scansRes.json(), usersRes.json()
-        ]);
-
-        setStats(statsData);
-        setScans(scansData.scans);
-        setUsers(usersData.users);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'An error occurred';
-        setError(message);
-      }
-    };
-
-    fetchData();
+    const headers = { Authorization: `Bearer ${token}` };
+    fetch('/api/admin/stats', { headers })
+      .then((r) => r.json())
+      .then(setStats)
+      .catch(() => setError('Failed to load admin stats'));
   }, [token, isAdmin]);
+
+  // Fetch scans with pagination
+  useEffect(() => {
+    if (!token || !isAdmin) return;
+    const headers = { Authorization: `Bearer ${token}` };
+    fetch(`/api/admin/scans?page=${scanPage}&limit=${ITEMS_PER_PAGE}`, { headers })
+      .then((r) => r.json())
+      .then((data) => {
+        setScans(data.data || data.scans || []);
+        setScanPagination(data.pagination || null);
+      })
+      .catch(() => setError('Failed to load scans'));
+  }, [token, isAdmin, scanPage]);
+
+  // Fetch users with pagination
+  useEffect(() => {
+    if (!token || !isAdmin) return;
+    const headers = { Authorization: `Bearer ${token}` };
+    fetch(`/api/admin/users?page=${userPage}&limit=${ITEMS_PER_PAGE}`, { headers })
+      .then((r) => r.json())
+      .then((data) => {
+        setUsers(data.data || data.users || []);
+        setUserPagination(data.pagination || null);
+      })
+      .catch(() => setError('Failed to load users'));
+  }, [token, isAdmin, userPage]);
 
   if (isLoading || !isAdmin) return <div className="text-center mt-20 font-black text-2xl">Loading Admin...</div>;
 
@@ -86,8 +105,13 @@ export default function AdminPage() {
 
           {/* Recent Scans Table */}
           <div className="brutal-card bg-white p-0 overflow-hidden mb-12">
-            <div className="bg-brutal-black text-white p-4">
+            <div className="bg-brutal-black text-white p-4 flex justify-between items-center">
               <h2 className="text-2xl font-black uppercase">Recent Scans</h2>
+              {scanPagination && (
+                <span className="text-sm font-bold text-gray-300">
+                  {scanPagination.total} total • Page {scanPagination.page}/{scanPagination.pages}
+                </span>
+              )}
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left font-bold border-collapse">
@@ -101,7 +125,7 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {scans.slice(0, 50).map((scan) => (
+                  {scans.map((scan) => (
                     <tr key={scan.id} className="border-b-2 border-brutal-black hover:bg-[#FDFBF7]">
                       <td className="p-4 truncate max-w-[200px]">{scan.userName}</td>
                       <td className="p-4">{scan.report.safetyScore}</td>
@@ -122,12 +146,39 @@ export default function AdminPage() {
                 </tbody>
               </table>
             </div>
+            {/* Pagination Controls */}
+            {scanPagination && scanPagination.pages > 1 && (
+              <div className="flex items-center justify-between border-t-4 border-brutal-black p-4 bg-[#F5F5F5]">
+                <button
+                  onClick={() => setScanPage((p) => Math.max(1, p - 1))}
+                  disabled={scanPage <= 1}
+                  className="btn-secondary text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  ← Previous
+                </button>
+                <span className="font-black text-brutal-black uppercase text-sm tracking-wider">
+                  Page {scanPagination.page} of {scanPagination.pages}
+                </span>
+                <button
+                  onClick={() => setScanPage((p) => Math.min(scanPagination.pages, p + 1))}
+                  disabled={scanPage >= scanPagination.pages}
+                  className="btn-secondary text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Users List */}
           <div className="brutal-card bg-white p-0 overflow-hidden">
-            <div className="bg-brutal-blue text-white p-4 border-b-4 border-brutal-black">
+            <div className="bg-brutal-blue text-white p-4 border-b-4 border-brutal-black flex justify-between items-center">
               <h2 className="text-2xl font-black uppercase text-brutal-black drop-shadow-[1px_1px_0_#fff]">Registered Users</h2>
+              {userPagination && (
+                <span className="text-sm font-bold text-brutal-black">
+                  {userPagination.total} total • Page {userPagination.page}/{userPagination.pages}
+                </span>
+              )}
             </div>
             <div className="overflow-x-auto">
             <table className="w-full text-left font-bold border-collapse min-w-[500px]">
@@ -155,6 +206,28 @@ export default function AdminPage() {
                 </tbody>
               </table>
             </div>
+            {/* Pagination Controls */}
+            {userPagination && userPagination.pages > 1 && (
+              <div className="flex items-center justify-between border-t-4 border-brutal-black p-4 bg-[#F5F5F5]">
+                <button
+                  onClick={() => setUserPage((p) => Math.max(1, p - 1))}
+                  disabled={userPage <= 1}
+                  className="btn-secondary text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  ← Previous
+                </button>
+                <span className="font-black text-brutal-black uppercase text-sm tracking-wider">
+                  Page {userPagination.page} of {userPagination.pages}
+                </span>
+                <button
+                  onClick={() => setUserPage((p) => Math.min(userPagination.pages, p + 1))}
+                  disabled={userPage >= userPagination.pages}
+                  className="btn-secondary text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
           </div>
         </>
       )}

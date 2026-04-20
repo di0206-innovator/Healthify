@@ -5,6 +5,7 @@ import LoginPage from './components/LoginPage';
 import SignupPage from './components/SignupPage';
 import AdminPage from './components/AdminPage';
 import ScanHistory from './components/ScanHistory';
+import DataExport from './components/DataExport';
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/history" element={<ScanHistory />} />
+          <Route path="/my-data" element={<DataExport />} />
         </Routes>
       </main>
 

@@ -33,7 +33,7 @@ export default function SignupPage() {
         throw new Error(data.error || 'Signup failed');
       }
 
-      login(data.token, data.user);
+      login(data.token, data.user, data.refreshToken);
       navigate('/');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Signup failed';
