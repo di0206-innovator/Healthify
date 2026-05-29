@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { COUNTRIES, SAMPLE_INGREDIENTS } from '../types';
+import { COUNTRIES } from '../types';
 import type { ScanStep, ScanReport } from '../types';
 import { useAuth } from '../context/AuthContext';
 import ProgressIndicator from './ProgressIndicator';
@@ -96,8 +96,8 @@ export default function Scanner({
       { step: 'parsing', delay: 0 },
       { step: 'analysing', delay: 2000 },
       { step: 'checking-bans', delay: 4000 },
-      { step: 'finding-alternatives', delay: 4000 },
-      { step: 'generating-report', delay: 6000 },
+      { step: 'finding-alternatives', delay: 6000 },
+      { step: 'generating-report', delay: 8000 },
     ];
 
     // Start step timer progression

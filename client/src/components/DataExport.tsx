@@ -44,7 +44,7 @@ export default function DataExport() {
       URL.revokeObjectURL(url);
 
       setMessage({ type: 'success', text: 'Your data has been downloaded!' });
-    } catch (err) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to export data. Please try again.' });
     } finally {
       setIsExporting(false);
@@ -66,7 +66,7 @@ export default function DataExport() {
 
       logout();
       navigate('/');
-    } catch (err) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to delete account. Please try again.' });
     } finally {
       setIsDeleting(false);

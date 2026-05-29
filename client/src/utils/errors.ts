@@ -15,11 +15,12 @@ export interface ApiError {
 /**
  * Parse an API error response into a typed ApiError.
  */
-export function parseApiError(response: any): ApiError {
+export function parseApiError(response: unknown): ApiError {
+  const res = response as Record<string, string> | null | undefined;
   return {
-    message: response?.error || 'An unexpected error occurred.',
-    code: response?.code || 'UNKNOWN',
-    action: response?.action || 'retry',
+    message: res?.error || 'An unexpected error occurred.',
+    code: res?.code || 'UNKNOWN',
+    action: (res?.action as ErrorAction) || 'retry',
   };
 }
 

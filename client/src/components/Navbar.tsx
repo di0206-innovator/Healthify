@@ -48,7 +48,7 @@ export default function Navbar() {
                 My Data
               </Link>
               <div className="hidden sm:block text-sm font-bold uppercase border-l-2 border-brutal-black pl-4 py-1">
-                Hi, {user?.name.split(' ')[0]}
+                Hi, {user?.name ? user.name.split(' ')[0] : 'User'}
               </div>
               <button onClick={handleLogout} className="text-xs sm:text-sm font-bold bg-brutal-black text-white px-2 sm:px-3 py-1.5 rounded-lg border-2 border-brutal-black hover:bg-brutal-red transition-colors">
                 Logout
