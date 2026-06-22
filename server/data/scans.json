@@ -1,5 +1,106 @@
 [
   {
+    "id": "b0d25ec6-d755-4e81-b32b-4ddb53157ac4",
+    "userId": "9747ffef-5d5e-4d7f-b88b-df138a5c3d1d",
+    "userName": "Divyanshu Sinha",
+    "report": {
+      "ingredients": [
+        {
+          "ingredient": "Maltodextrin",
+          "severity": "low",
+          "reason": "Has a high glycemic index which can cause rapid spikes in blood sugar levels and may alter gut microbiota.",
+          "category": "thickener/sweetener",
+          "bans": [],
+          "bannedInSelected": false,
+          "substitute": "Arrowroot powder"
+        },
+        {
+          "ingredient": "High Fructose Corn Syrup",
+          "severity": "medium",
+          "reason": "Highly processed sugar linked to increased risks of obesity, type 2 diabetes, and metabolic syndrome.",
+          "category": "sweetener",
+          "bans": [],
+          "bannedInSelected": false,
+          "substitute": "Raw honey"
+        },
+        {
+          "ingredient": "Potassium Bromate",
+          "severity": "high",
+          "reason": "Classified as a possible human carcinogen (Group 2B) by IARC and linked to kidney and thyroid issues.",
+          "category": "flour improver",
+          "bans": [
+            "EU",
+            "UK",
+            "Canada",
+            "China",
+            "Brazil"
+          ],
+          "bannedInSelected": true,
+          "substitute": "Ascorbic acid"
+        },
+        {
+          "ingredient": "Stevia",
+          "severity": "safe",
+          "reason": "A natural, zero-calorie sweetener derived from plant leaves with a long history of safe use.",
+          "category": "natural sweetener",
+          "bans": [],
+          "bannedInSelected": false,
+          "substitute": null
+        },
+        {
+          "ingredient": "MSG",
+          "severity": "low",
+          "reason": "Generally recognized as safe, though some individuals may experience temporary sensitivity reactions like headaches.",
+          "category": "flavor enhancer",
+          "bans": [],
+          "bannedInSelected": false,
+          "substitute": "Nutritional yeast"
+        },
+        {
+          "ingredient": "Red 40",
+          "severity": "medium",
+          "reason": "Synthetic dye linked to hyperactivity in children and potential allergic reactions in sensitive individuals.",
+          "category": "artificial dye",
+          "bans": [
+            "EU (requires warning label)"
+          ],
+          "bannedInSelected": false,
+          "substitute": "Beetroot juice"
+        },
+        {
+          "ingredient": "Citric Acid",
+          "severity": "safe",
+          "reason": "Commonly occurring organic acid used as a preservative and flavorant with no significant health risks.",
+          "category": "preservative",
+          "bans": [],
+          "bannedInSelected": false,
+          "substitute": null
+        },
+        {
+          "ingredient": "Titanium Dioxide",
+          "severity": "high",
+          "reason": "Banned in the EU due to concerns regarding genotoxicity and its potential to accumulate in the body.",
+          "category": "artificial color",
+          "bans": [
+            "EU"
+          ],
+          "bannedInSelected": false,
+          "substitute": "Rice starch"
+        }
+      ],
+      "safetyScore": 56,
+      "grade": "C",
+      "totalCount": 8,
+      "harmfulCount": 4,
+      "country": "India",
+      "scannedAt": "2026-04-20T18:34:54.029Z",
+      "inputText": "Maltodextrin, High Fructose Corn Syrup, Potassium Bromate, Stevia, MSG, Red 40, Citric Acid, Titanium Dioxide",
+      "id": "e788b092-bda9-45f6-8e9c-d4b98ec4e968",
+      "userId": "9747ffef-5d5e-4d7f-b88b-df138a5c3d1d"
+    },
+    "createdAt": "2026-04-20T18:34:54.031Z"
+  },
+  {
     "id": "3593033c-ba9b-417d-a2ce-35aadafe640a",
     "userId": "ec973948-ef5f-457c-8293-2087ce4315a8",
     "userName": "Admin",

@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 
 let genAIInstance: GoogleGenerativeAI | null = null;
 
@@ -14,6 +14,25 @@ function getGenAI(): GoogleGenerativeAI {
   genAIInstance = new GoogleGenerativeAI(apiKey);
   return genAIInstance;
 }
+
+const safetySettings = [
+  {
+    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+];
 
 /**
  * Helper for exponential backoff retries on transient errors (429, 500, 503)
@@ -68,6 +87,8 @@ export async function callGemini(
             maxOutputTokens: 2048,
             responseMimeType: 'application/json',
           },
+          systemInstruction: systemPrompt,
+          safetySettings,
         });
 
         const controller = new AbortController();
@@ -75,7 +96,8 @@ export async function callGemini(
 
         try {
           const result = await model.generateContent({
-            contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\n---\n\nInput:\n${userInput}` }] }],
+            contents: [{ role: 'user', parts: [{ text: userInput }] }],
+            safetySettings,
           });
 
           clearTimeout(timeout);
@@ -90,8 +112,10 @@ export async function callGemini(
       const status = error?.status || error?.response?.status;
       const shouldFallback = status === 429 || status === 404 || status === 503;
       
-      if (shouldFallback && modelName !== models[models.length - 1]) {
-        console.warn(`⚠️  Error ${status} for ${modelName}. Falling back to ${models[models.indexOf(modelName) + 1]}...`);
+      if (shouldFallback && modelName !== models.at(-1)) {
+        const nextIndex = models.indexOf(modelName) + 1;
+        const nextModel = models.at(nextIndex);
+        console.warn(`⚠️  Error ${status} for ${modelName}. Falling back to ${nextModel}...`);
         continue;
       }
       break;
@@ -126,6 +150,8 @@ export async function callGeminiVision(
             temperature: 0.1,
             maxOutputTokens: 2048,
           },
+          systemInstruction: prompt,
+          safetySettings,
         });
 
         const controller = new AbortController();
@@ -137,11 +163,11 @@ export async function callGeminiVision(
               {
                 role: 'user',
                 parts: [
-                  { text: prompt },
                   { inlineData: { mimeType, data: imageBase64 } },
                 ],
               },
             ],
+            safetySettings,
           });
 
           clearTimeout(timeout);
@@ -156,8 +182,10 @@ export async function callGeminiVision(
       const status = error?.status || error?.response?.status;
       const shouldFallback = status === 429 || status === 404 || status === 503;
 
-      if (shouldFallback && modelName !== models[models.length - 1]) {
-        console.warn(`⚠️  Error ${status} for ${modelName} (Vision). Falling back to ${models[models.indexOf(modelName) + 1]}...`);
+      if (shouldFallback && modelName !== models.at(-1)) {
+        const nextIndex = models.indexOf(modelName) + 1;
+        const nextModel = models.at(nextIndex);
+        console.warn(`⚠️  Error ${status} for ${modelName} (Vision). Falling back to ${nextModel}...`);
         continue;
       }
       break;

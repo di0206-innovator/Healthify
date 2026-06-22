@@ -1,14 +1,19 @@
 import fs from 'fs/promises';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import type { User, UserPublic, StoredScan, ScanReport, AdminStats } from './types';
 import { hashPassword } from './auth';
 import logger from './utils/logger';
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
-const USERS_FILE = path.join(DATA_DIR, 'users.json');
-const SCANS_FILE = path.join(DATA_DIR, 'scans.json');
+const DATA_DIR = path.normalize(path.join(__dirname, '..', 'data'));
+const USERS_FILE = path.normalize(path.join(DATA_DIR, 'users.json'));
+const SCANS_FILE = path.normalize(path.join(DATA_DIR, 'scans.json'));
+
+// Validate that the paths do not escape the data directory (preventing directory traversal)
+if (!USERS_FILE.startsWith(DATA_DIR) || !SCANS_FILE.startsWith(DATA_DIR)) {
+  throw new Error('Directory traversal attempt detected');
+}
 
 // In-memory cache
 let usersCache: User[] | null = null;
@@ -41,7 +46,7 @@ function ensureDataFiles(): void {
   } else {
     // Audit check: ensure at least one admin exists
     try {
-      const data = JSON.parse(require('fs').readFileSync(USERS_FILE, 'utf-8'));
+      const data = JSON.parse(readFileSync(USERS_FILE, 'utf-8'));
       const hasAdmin = Array.isArray(data) && data.some((u: any) => u.role === 'admin');
       if (!hasAdmin) {
         data.push(defaultAdmin);
@@ -266,7 +271,12 @@ export async function getStats(): Promise<AdminStats> {
 
   const gradeDistribution: Record<string, number> = { A: 0, B: 0, C: 0, D: 0, F: 0 };
   scans.forEach((s) => {
-    gradeDistribution[s.report.grade] = (gradeDistribution[s.report.grade] || 0) + 1;
+    const grade = s.report.grade;
+    if (grade === 'A') gradeDistribution.A = (gradeDistribution.A || 0) + 1;
+    else if (grade === 'B') gradeDistribution.B = (gradeDistribution.B || 0) + 1;
+    else if (grade === 'C') gradeDistribution.C = (gradeDistribution.C || 0) + 1;
+    else if (grade === 'D') gradeDistribution.D = (gradeDistribution.D || 0) + 1;
+    else if (grade === 'F') gradeDistribution.F = (gradeDistribution.F || 0) + 1;
   });
 
   return {

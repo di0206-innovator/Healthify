@@ -18,7 +18,7 @@ import { Errors, toErrorResponse, AppError } from './utils/errors';
 // Production Environment Validation
 const REQUIRED_ENV_VARS = ['GEMINI_API_KEY', 'JWT_SECRET'];
 REQUIRED_ENV_VARS.forEach((key) => {
-  const val = process.env[key];
+  const val = key === 'GEMINI_API_KEY' ? process.env.GEMINI_API_KEY : process.env.JWT_SECRET;
   if (!val || val === 'your_key_here') {
     logger.error(`❌ CRITICAL: Environment variable ${key} is missing or placeholder.`);
     process.exit(1);
@@ -404,6 +404,21 @@ app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) =>
 
   const result = await getPaginatedUsers(page, limit);
   return res.json(result);
+});
+
+import path from 'path';
+
+// Serve client static files in production
+const clientDistPath = path.normalize(path.join(__dirname, '..', '..', 'client', 'dist'));
+app.use(express.static(clientDistPath));
+
+// Fallback all other routes to index.html (supporting client-side routing)
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    next();
+    return;
+  }
+  res.sendFile(path.join(clientDistPath, 'index.html'));
 });
 
 // ========== Error Handling Middleware ==========

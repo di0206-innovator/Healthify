@@ -1,10 +1,26 @@
 [
   {
-    "id": "4e011396-a9be-425c-beb3-5083eeb6c6af",
+    "id": "537e0c95-345b-4030-9793-2b3eb6faed36",
     "name": "Admin",
     "email": "admin@healthify.com",
-    "passwordHash": "c2d38d8a750801f79674dba401344468:915bbfa9bd3643288ef46f1361771b343041636ffa707af4bc11ff501ab2dc3bb69f3c5cc5fc7b210ae4a6420120199afbae8224797c035fbfff66689b9da7c8",
+    "passwordHash": "e0100376626225bb253137d3126e2327:c8b08d95373e848f09d0559b3a1c84a0702910e0beaef28f9d05c9819d7e367641cdc26e0d0d755a26aa2114b3d96cde7a9d1e4be703f5ce5be1609c3bfb371f",
     "role": "admin",
-    "createdAt": "2026-04-17T09:35:12.432Z"
+    "createdAt": "2026-04-17T19:34:14.658Z"
+  },
+  {
+    "id": "d1df741d-3e08-4bc8-8051-60b3ae3a9adc",
+    "name": "Test User",
+    "email": "test@test.com",
+    "passwordHash": "f039a86994bb29776b5859ac1068088d:49779be536064086d7e1cfe755d80a7ed61351e8260af2b346d4a335a9b63cfab51bdf35ae6833c2723c0a32453c6bfa0c92be98369448eeefea867de033a195",
+    "role": "user",
+    "createdAt": "2026-04-18T19:52:43.683Z"
+  },
+  {
+    "id": "9747ffef-5d5e-4d7f-b88b-df138a5c3d1d",
+    "name": "Divyanshu Sinha",
+    "email": "divyanshusunstone@gmail.com",
+    "passwordHash": "24f7f97eb232ecaf8d3f9b611a0efe00:e42cf02917b6986e2ac5468497b771935c8f0d0a0f681ccf9c02f8992da1ffa37cba113b9a6e504543f6513a09b02de80590c4b7992a0ebfc836863856c74d70",
+    "role": "user",
+    "createdAt": "2026-04-20T18:34:25.675Z"
   }
 ]
