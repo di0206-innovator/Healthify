@@ -18,19 +18,19 @@ function getGenAI(): GoogleGenerativeAI {
 const safetySettings = [
   {
     category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
   },
   {
     category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
   },
   {
     category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
   },
   {
     category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
   },
 ];
 
@@ -98,6 +98,8 @@ export async function callGemini(
           const result = await model.generateContent({
             contents: [{ role: 'user', parts: [{ text: userInput }] }],
             safetySettings,
+          }, {
+            signal: controller.signal,
           });
 
           clearTimeout(timeout);
@@ -168,6 +170,8 @@ export async function callGeminiVision(
               },
             ],
             safetySettings,
+          }, {
+            signal: controller.signal,
           });
 
           clearTimeout(timeout);

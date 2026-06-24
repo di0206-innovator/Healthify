@@ -21,7 +21,7 @@ export default function Scanner({
   country, 
   setCountry 
 }: ScannerProps) {
-  const { token } = useAuth();
+  const { authFetch } = useAuth();
   
   const [currentStep, setCurrentStep] = useState<ScanStep>('idle');
   const [error, setError] = useState<ApiError | null>(null);
@@ -91,39 +91,15 @@ export default function Scanner({
     setErrorMessage(null);
     setCurrentStep('parsing');
 
-    // Simulate step progression with timing
-    const stepTimings: { step: ScanStep; delay: number }[] = [
-      { step: 'parsing', delay: 0 },
-      { step: 'analysing', delay: 2000 },
-      { step: 'checking-bans', delay: 4000 },
-      { step: 'finding-alternatives', delay: 6000 },
-      { step: 'generating-report', delay: 8000 },
-    ];
-
-    // Start step timer progression
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    for (const { step, delay } of stepTimings) {
-      if (delay > 0) {
-        timers.push(setTimeout(() => setCurrentStep(step), delay));
-      }
-    }
-
     try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const res = await fetch('/api/scan', {
+      const res = await authFetch('/api/scan', {
         method: 'POST',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/event-stream',
+        },
         body: JSON.stringify({ ingredientText: ingredientText.trim(), country }),
       });
-
-      // Clear step timers
-      timers.forEach(clearTimeout);
 
       if (!res.ok) {
         let errData;
@@ -138,17 +114,46 @@ export default function Scanner({
         return;
       }
 
-      try {
-        const report: ScanReport = await res.json();
-        setCurrentStep('done');
-        onReportReady(report);
-      } catch (err) {
-        console.error('Failed to parse scan report:', err);
-        setError({ message: 'Received an invalid response from the server. Please try again.', code: 'PARSE_ERROR', action: 'retry' });
-        setCurrentStep('error');
+      const reader = res.body?.getReader();
+      if (!reader) {
+        throw new Error('Streaming response not supported by server');
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('data: ')) continue;
+          
+          try {
+            const data = JSON.parse(trimmed.slice(6));
+            if (data.type === 'progress') {
+              setCurrentStep(data.step);
+            } else if (data.type === 'done') {
+              setCurrentStep('done');
+              onReportReady(data.report);
+              return;
+            } else if (data.type === 'error') {
+              setError({ message: data.error, code: 'SCAN_FAILED', action: 'retry' });
+              setCurrentStep('error');
+              return;
+            }
+          } catch (e) {
+            console.error('Failed to parse SSE line:', trimmed, e);
+          }
+        }
       }
     } catch (err: unknown) {
-      timers.forEach(clearTimeout);
       setCurrentStep('error');
       const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
       setErrorMessage(message);

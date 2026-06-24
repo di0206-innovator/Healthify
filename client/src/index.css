@@ -176,3 +176,15 @@
   display: flex;
   white-space: nowrap;
 }
+
+/* High Contrast Neo-Brutalist Focus Rings for Accessibility */
+.brutal-input:focus-visible,
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 4px dashed var(--brutal-black);
+  outline-offset: 4px;
+}

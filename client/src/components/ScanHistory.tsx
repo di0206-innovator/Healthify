@@ -5,7 +5,7 @@ import ReportCard from './ReportCard';
 import type { StoredScan } from '../types';
 
 export default function ScanHistory() {
-  const { token, isAuthenticated, isLoading } = useAuth();
+  const { authFetch, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const [scans, setScans] = useState<StoredScan[]>([]);
@@ -20,13 +20,11 @@ export default function ScanHistory() {
   }, [isAuthenticated, isLoading, navigate]);
 
   useEffect(() => {
-    if (!token) return;
+    if (!isAuthenticated) return;
 
     const fetchHistory = async () => {
       try {
-        const res = await fetch('/api/scans/history', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await authFetch('/api/scans/history');
         if (!res.ok) throw new Error('Failed to load history');
         
         const data = await res.json();
@@ -40,7 +38,7 @@ export default function ScanHistory() {
     };
 
     fetchHistory();
-  }, [token]);
+  }, [isAuthenticated, authFetch]);
 
   if (isLoading || loadingScans) return <div className="text-center mt-20 font-black text-2xl animate-pulse">Loading History...</div>;
 

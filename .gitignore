@@ -33,3 +33,9 @@ scratch/
 
 # Awesome Skills Repository
 antigravity-awesome-skills/
+
+# Database & Test Data
+data-test/
+*.db
+*.db-wal
+*.db-shm

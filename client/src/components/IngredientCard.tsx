@@ -6,10 +6,10 @@ interface IngredientCardProps {
 }
 
 const SEVERITY_CONFIG = {
-  safe: { label: 'SAFE', class: 'severity-safe', icon: '✓' },
-  low: { label: 'LOW', class: 'severity-low', icon: '⚠' },
-  medium: { label: 'MEDIUM', class: 'severity-medium', icon: '⚠' },
-  high: { label: 'HIGH', class: 'severity-high', icon: '✕' },
+  safe: { label: 'SAFE', class: 'badge-safe', icon: '✓' },
+  low: { label: 'LOW', class: 'badge-low', icon: '⚠' },
+  medium: { label: 'MEDIUM', class: 'badge-medium', icon: '⚠' },
+  high: { label: 'HIGH', class: 'badge-high', icon: '✕' },
 } as const;
 
 const COUNTRY_FLAGS: Record<string, string> = {

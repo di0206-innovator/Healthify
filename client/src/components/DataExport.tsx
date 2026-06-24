@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const API_BASE = '';
 
 export default function DataExport() {
-  const { token, isAuthenticated, logout } = useAuth();
+  const { authFetch, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -27,9 +27,7 @@ export default function DataExport() {
     setIsExporting(true);
     setMessage(null);
     try {
-      const res = await fetch(`${API_BASE}/api/user/data-export`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await authFetch(`${API_BASE}/api/user/data-export`);
 
       if (!res.ok) throw new Error('Failed to export data');
 
@@ -57,9 +55,8 @@ export default function DataExport() {
     setIsDeleting(true);
     setMessage(null);
     try {
-      const res = await fetch(`${API_BASE}/api/user/account`, {
+      const res = await authFetch(`${API_BASE}/api/user/account`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!res.ok) throw new Error('Failed to delete account');

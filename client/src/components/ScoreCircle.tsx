@@ -7,11 +7,11 @@ interface ScoreCircleProps {
   totalCount: number;
 }
 
-function getScoreColor(score: number): { bg: string; text: string; wrapper: string; badge: string; shadow: string } {
-  if (score >= 80) return { bg: 'bg-brutal-green', text: 'text-brutal-black', wrapper: 'border-brutal-black bg-brutal-green', badge: 'bg-brutal-yellow', shadow: '#FFD000' };
-  if (score >= 60) return { bg: 'bg-brutal-yellow', text: 'text-brutal-black', wrapper: 'border-brutal-black bg-brutal-yellow', badge: 'bg-white', shadow: '#E0E0E0' };
-  if (score >= 40) return { bg: 'bg-brutal-orange', text: 'text-brutal-black', wrapper: 'border-brutal-black bg-brutal-orange', badge: 'bg-white', shadow: '#1A1A1A' };
-  return { bg: 'bg-brutal-red', text: 'text-brutal-black', wrapper: 'border-brutal-black bg-brutal-red text-white', badge: 'bg-brutal-black text-white', shadow: '#1A1A1A' };
+function getScoreColor(score: number): { bg: string; text: string; wrapper: string; badge: string; badgeText: string; shadow: string } {
+  if (score >= 80) return { bg: 'bg-brutal-green', text: 'text-brutal-black', wrapper: 'border-brutal-black bg-brutal-green', badge: 'bg-brutal-yellow', badgeText: 'text-brutal-black', shadow: '#FFD000' };
+  if (score >= 60) return { bg: 'bg-brutal-yellow', text: 'text-brutal-black', wrapper: 'border-brutal-black bg-brutal-yellow', badge: 'bg-white', badgeText: 'text-brutal-black', shadow: '#E0E0E0' };
+  if (score >= 40) return { bg: 'bg-brutal-orange', text: 'text-brutal-black', wrapper: 'border-brutal-black bg-brutal-orange', badge: 'bg-white', badgeText: 'text-brutal-black', shadow: '#1A1A1A' };
+  return { bg: 'bg-brutal-red', text: 'text-brutal-black', wrapper: 'border-brutal-black bg-brutal-red text-white', badge: 'bg-brutal-black text-white', badgeText: 'text-white', shadow: '#1A1A1A' };
 }
 
 export default function ScoreCircle({ score, grade, harmfulCount, totalCount }: ScoreCircleProps) {
@@ -58,7 +58,7 @@ export default function ScoreCircle({ score, grade, harmfulCount, totalCount }: 
 
       {/* Grade badge */}
       <div className={`mt-4 sm:mt-6 px-4 sm:px-6 py-2 border-4 border-brutal-black rotate-2 ${colors.badge}`} style={{ boxShadow: 'var(--brutal-shadow)' }}>
-        <span className={`text-xl sm:text-2xl font-black uppercase tracking-widest ${colors.text}`}>
+        <span className={`text-xl sm:text-2xl font-black uppercase tracking-widest ${colors.badgeText}`}>
           Grade {grade}
         </span>
       </div>

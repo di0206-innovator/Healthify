@@ -11,7 +11,7 @@ interface PaginationInfo {
 }
 
 export default function AdminPage() {
-  const { token, isAdmin, isLoading } = useAuth();
+  const { authFetch, isAdmin, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -34,39 +34,36 @@ export default function AdminPage() {
 
   // Fetch stats once
   useEffect(() => {
-    if (!token || !isAdmin) return;
-    const headers = { Authorization: `Bearer ${token}` };
-    fetch('/api/admin/stats', { headers })
+    if (!isAdmin) return;
+    authFetch('/api/admin/stats')
       .then((r) => r.json())
       .then(setStats)
       .catch(() => setError('Failed to load admin stats'));
-  }, [token, isAdmin]);
+  }, [isAdmin, authFetch]);
 
   // Fetch scans with pagination
   useEffect(() => {
-    if (!token || !isAdmin) return;
-    const headers = { Authorization: `Bearer ${token}` };
-    fetch(`/api/admin/scans?page=${scanPage}&limit=${ITEMS_PER_PAGE}`, { headers })
+    if (!isAdmin) return;
+    authFetch(`/api/admin/scans?page=${scanPage}&limit=${ITEMS_PER_PAGE}`)
       .then((r) => r.json())
       .then((data) => {
         setScans(data.data || data.scans || []);
         setScanPagination(data.pagination || null);
       })
       .catch(() => setError('Failed to load scans'));
-  }, [token, isAdmin, scanPage]);
+  }, [isAdmin, scanPage, authFetch]);
 
   // Fetch users with pagination
   useEffect(() => {
-    if (!token || !isAdmin) return;
-    const headers = { Authorization: `Bearer ${token}` };
-    fetch(`/api/admin/users?page=${userPage}&limit=${ITEMS_PER_PAGE}`, { headers })
+    if (!isAdmin) return;
+    authFetch(`/api/admin/users?page=${userPage}&limit=${ITEMS_PER_PAGE}`)
       .then((r) => r.json())
       .then((data) => {
         setUsers(data.data || data.users || []);
         setUserPagination(data.pagination || null);
       })
       .catch(() => setError('Failed to load users'));
-  }, [token, isAdmin, userPage]);
+  }, [isAdmin, userPage, authFetch]);
 
   if (isLoading || !isAdmin) return <div className="text-center mt-20 font-black text-2xl">Loading Admin...</div>;
 

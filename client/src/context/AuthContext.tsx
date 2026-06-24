@@ -5,6 +5,7 @@ interface AuthContextType extends AuthState {
   login: (token: string, user: User, refreshToken?: string) => void;
   logout: () => void;
   getValidToken: () => Promise<string | null>;
+  authFetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -82,7 +83,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Quick check: decode JWT payload to see if it's expired
     try {
-      const payloadBase64 = currentToken.split('.')[1];
+      let payloadBase64 = currentToken.split('.')[1];
+      // Normalize base64url to base64
+      payloadBase64 = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
+      const pad = payloadBase64.length % 4;
+      if (pad) {
+        payloadBase64 += '='.repeat(4 - pad);
+      }
+      
       const payload = JSON.parse(atob(payloadBase64));
       const now = Math.floor(Date.now() / 1000);
 
@@ -90,9 +98,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (payload.exp && payload.exp > now + 60) {
         return currentToken;
       }
-    } catch {
-      // If we can't decode, try to use it anyway
-      return currentToken;
+    } catch (e) {
+      console.warn('Failed to parse access token payload:', e);
+      // Fallback: try to refresh if decoding fails
     }
 
     // Token is expired or almost expired — try to refresh
@@ -140,8 +148,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return refreshingRef.current;
   }, [logout]);
 
+  const authFetch = useCallback(async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const validToken = await getValidToken();
+    const headers = new Headers(init?.headers);
+    if (validToken) {
+      headers.set('Authorization', `Bearer ${validToken}`);
+    }
+    return fetch(input, { ...init, headers });
+  }, [getValidToken]);
+
   return (
-    <AuthContext.Provider value={{ ...state, login, logout, getValidToken }}>
+    <AuthContext.Provider value={{ ...state, login, logout, getValidToken, authFetch }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
+    setIsOpen(false);
     navigate('/');
   };
 
@@ -17,6 +20,7 @@ export default function Navbar() {
           to="/"
           className="flex items-center gap-2.5 group hover:-translate-y-0.5 transition-transform"
           id="navbar-logo"
+          onClick={() => setIsOpen(false)}
         >
           {/* Logo icon */}
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-brutal-yellow border-3 sm:border-4 border-brutal-black flex items-center justify-center shadow-[2px_2px_0_0_#1A1A1A] group-hover:bg-brutal-pink transition-colors">
@@ -32,22 +36,22 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Right side */}
-        <div className="flex items-center gap-2 sm:gap-4">
+        {/* Right side - Desktop Links */}
+        <div className="hidden sm:flex items-center gap-2 sm:gap-4">
           {isAuthenticated ? (
             <>
               {isAdmin && (
-                <Link to="/admin" className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-brutal-purple border-2 border-brutal-black text-xs font-bold text-white shadow-[2px_2px_0_0_#1A1A1A] hover:translate-y-[-2px] transition-transform">
+                <Link to="/admin" className="items-center gap-1.5 px-3 py-1 rounded-lg bg-brutal-purple border-2 border-brutal-black text-xs font-bold text-white shadow-[2px_2px_0_0_#1A1A1A] hover:translate-y-[-2px] transition-transform">
                   ★ Admin
                 </Link>
               )}
               <Link to="/history" className="text-xs sm:text-sm font-bold border-2 border-brutal-black px-2 sm:px-3 py-1 rounded-lg hover:bg-brutal-yellow shadow-[2px_2px_0_0_#1A1A1A] transition-colors">
                 History
               </Link>
-              <Link to="/my-data" className="hidden sm:inline-flex text-xs sm:text-sm font-bold border-2 border-brutal-black px-2 sm:px-3 py-1 rounded-lg hover:bg-brutal-blue shadow-[2px_2px_0_0_#1A1A1A] transition-colors">
+              <Link to="/my-data" className="items-center text-xs sm:text-sm font-bold border-2 border-brutal-black px-2 sm:px-3 py-1 rounded-lg hover:bg-brutal-blue shadow-[2px_2px_0_0_#1A1A1A] transition-colors">
                 My Data
               </Link>
-              <div className="hidden sm:block text-sm font-bold uppercase border-l-2 border-brutal-black pl-4 py-1">
+              <div className="text-sm font-bold uppercase border-l-2 border-brutal-black pl-4 py-1">
                 Hi, {user?.name ? user.name.split(' ')[0] : 'User'}
               </div>
               <button onClick={handleLogout} className="text-xs sm:text-sm font-bold bg-brutal-black text-white px-2 sm:px-3 py-1.5 rounded-lg border-2 border-brutal-black hover:bg-brutal-red transition-colors">
@@ -69,7 +73,7 @@ export default function Navbar() {
             href="https://github.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex w-10 h-10 rounded-lg bg-white border-2 border-brutal-black items-center justify-center text-brutal-black hover:bg-brutal-yellow hover:-translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition-all ml-2"
+            className="flex w-10 h-10 rounded-lg bg-white border-2 border-brutal-black items-center justify-center text-brutal-black hover:bg-brutal-yellow hover:-translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] transition-all ml-2"
             aria-label="GitHub"
             id="github-link"
           >
@@ -78,7 +82,84 @@ export default function Navbar() {
             </svg>
           </a>
         </div>
+
+        {/* Hamburger Menu Button (Mobile) */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="sm:hidden w-10 h-10 rounded-lg bg-white border-2 border-brutal-black flex items-center justify-center text-brutal-black hover:bg-brutal-yellow transition-all"
+          aria-label="Toggle navigation menu"
+          aria-expanded={isOpen}
+        >
+          {isOpen ? (
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
       </div>
+
+      {/* Mobile Menu Panel */}
+      {isOpen && (
+        <div className="sm:hidden border-t-4 border-brutal-black bg-brutal-bg p-4 flex flex-col gap-3 font-bold uppercase animate-pop-in">
+          {isAuthenticated ? (
+            <>
+              <div className="text-sm border-b-2 border-brutal-black pb-2 mb-1">
+                Hi, {user?.name || 'User'}
+              </div>
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="px-3 py-2 rounded-lg bg-brutal-purple border-2 border-brutal-black text-center text-white shadow-[2px_2px_0_0_#1A1A1A]"
+                >
+                  ★ Admin Panel
+                </Link>
+              )}
+              <Link
+                to="/history"
+                onClick={() => setIsOpen(false)}
+                className="px-3 py-2 rounded-lg bg-white border-2 border-brutal-black text-center hover:bg-brutal-yellow shadow-[2px_2px_0_0_#1A1A1A]"
+              >
+                History
+              </Link>
+              <Link
+                to="/my-data"
+                onClick={() => setIsOpen(false)}
+                className="px-3 py-2 rounded-lg bg-white border-2 border-brutal-black text-center hover:bg-brutal-blue shadow-[2px_2px_0_0_#1A1A1A]"
+              >
+                My Data
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="px-3 py-2 rounded-lg bg-brutal-black text-white text-center border-2 border-brutal-black hover:bg-brutal-red"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                onClick={() => setIsOpen(false)}
+                className="px-3 py-2 rounded-lg bg-white border-2 border-brutal-black text-center hover:bg-brutal-yellow"
+              >
+                Log In
+              </Link>
+              <Link
+                to="/signup"
+                onClick={() => setIsOpen(false)}
+                className="px-3 py-2 rounded-lg bg-brutal-green border-2 border-brutal-black text-center shadow-[2px_2px_0_0_#1A1A1A]"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
+      )}
     </nav>
   );
 }

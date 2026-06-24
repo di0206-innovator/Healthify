@@ -22,23 +22,40 @@ const REFRESH_TOKEN_EXPIRY = '7d';   // Long-lived refresh token
 const PBKDF2_ITERATIONS = 210000;
 
 /**
- * Hash a password using PBKDF2 (no external deps needed)
+ * Hash a password synchronously (for database seeding)
  */
-export function hashPassword(password: string): string {
+export function hashPasswordSync(password: string): string {
   const salt = crypto.randomBytes(16).toString('hex');
   const hash = crypto.pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, 64, 'sha512').toString('hex');
   return `${salt}:${hash}`;
 }
 
 /**
- * Verify a password against a stored hash
+ * Hash a password asynchronously (for high-concurrency requests)
  */
-export function verifyPassword(password: string, stored: string): boolean {
-  const parts = stored.split(':');
-  if (parts.length !== 2) return false;
-  const [salt, hash] = parts;
-  const verify = crypto.pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, 64, 'sha512').toString('hex');
-  return hash === verify;
+export function hashPassword(password: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const salt = crypto.randomBytes(16).toString('hex');
+    crypto.pbkdf2(password, salt, PBKDF2_ITERATIONS, 64, 'sha512', (err, derivedKey) => {
+      if (err) return reject(err);
+      resolve(`${salt}:${derivedKey.toString('hex')}`);
+    });
+  });
+}
+
+/**
+ * Verify a password against a stored hash asynchronously (for high-concurrency requests)
+ */
+export function verifyPassword(password: string, stored: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const parts = stored.split(':');
+    if (parts.length !== 2) return resolve(false);
+    const [salt, hash] = parts;
+    crypto.pbkdf2(password, salt, PBKDF2_ITERATIONS, 64, 'sha512', (err, derivedKey) => {
+      if (err) return resolve(false);
+      resolve(hash === derivedKey.toString('hex'));
+    });
+  });
 }
 
 /**

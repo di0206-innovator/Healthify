@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cluster from 'node:cluster';
+import os from 'node:os';
 import { rateLimit } from 'express-rate-limit';
 import { runPipeline } from './pipeline';
 import { callGeminiVision } from './agents/ai';
@@ -8,7 +10,7 @@ import { hashPassword, verifyPassword, generateToken, generateTokens, refreshAcc
 import {
   findUserByEmail, findUserById, createUser, toPublicUser,
   saveScan, getScansForUser, getAllScans, getScanById, getAllUsers, getStats,
-  getPaginatedScans, getPaginatedUsers, getUserDataExport, deleteUser,
+  getPaginatedScans, getPaginatedUsers, getUserDataExport, deleteUser, findCachedScanReport,
 } from './store';
 import { validate, SignupSchema, LoginSchema, ScanRequestSchema, OcrRequestSchema } from './validation';
 import type { ScanRequest, OcrRequest, SignupRequest, LoginRequest } from './types';
@@ -18,15 +20,15 @@ import { Errors, toErrorResponse, AppError } from './utils/errors';
 // Production Environment Validation
 const REQUIRED_ENV_VARS = ['GEMINI_API_KEY', 'JWT_SECRET'];
 REQUIRED_ENV_VARS.forEach((key) => {
-  const val = key === 'GEMINI_API_KEY' ? process.env.GEMINI_API_KEY : process.env.JWT_SECRET;
+  const val = process.env[key];
   if (!val || val === 'your_key_here') {
     logger.error(`❌ CRITICAL: Environment variable ${key} is missing or placeholder.`);
     process.exit(1);
   }
 
   // Format check for GEMINI_API_KEY
-  if (key === 'GEMINI_API_KEY' && !val.startsWith('AIza')) {
-    logger.warn(`⚠️  WARNING: GEMINI_API_KEY does not start with 'AIza'. This might cause 429 or auth errors.`);
+  if (key === 'GEMINI_API_KEY' && !val.startsWith('AIza') && !val.startsWith('AQ.')) {
+    logger.warn(`⚠️  WARNING: GEMINI_API_KEY does not start with 'AIza' or 'AQ.'. This might cause 429 or auth errors.`);
   }
 });
 
@@ -125,7 +127,7 @@ app.post('/api/auth/signup', authLimiter, validate(SignupSchema), async (req, re
   try {
     const { name, email, password } = req.body as SignupRequest;
 
-    const passwordHash = hashPassword(password);
+    const passwordHash = await hashPassword(password);
     const user = await createUser(name.trim(), email.trim(), passwordHash);
     const { accessToken, refreshToken } = generateTokens({ userId: user.id, email: user.email, role: user.role });
 
@@ -157,7 +159,7 @@ app.post('/api/auth/login', authLimiter, validate(LoginSchema), async (req, res)
       return res.status(401).json(toErrorResponse(Errors.INVALID_CREDENTIALS()));
     }
 
-    if (!verifyPassword(password, user.passwordHash)) {
+    if (!(await verifyPassword(password, user.passwordHash))) {
       logger.warn('Failed login attempt', { email: email.trim(), ip: req.ip });
       return res.status(401).json(toErrorResponse(Errors.INVALID_CREDENTIALS()));
     }
@@ -220,11 +222,84 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
  */
 app.post('/api/scan', apiLimiter, scanLimiter, preventConcurrentScans, validate(ScanRequestSchema), async (req, res) => {
   const startTime = Date.now();
+  const isStream = req.headers.accept === 'text/event-stream' || req.body.stream === true;
 
   try {
     const { ingredientText, country } = req.body as ScanRequest;
 
-    logger.info('Scan started', { country, inputLength: ingredientText.length });
+    logger.info('Scan started', { country, inputLength: ingredientText.length, stream: isStream });
+
+    // 1. Check Global SQLite Cache first
+    const cachedReport = await findCachedScanReport(ingredientText, country);
+    if (cachedReport) {
+      logger.info('Scan served from cache (sub-millisecond)', { country, inputLength: ingredientText.length });
+
+      // Save to history if logged in
+      let savedScan;
+      try {
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+          const payload = verifyToken(authHeader.slice(7));
+          const user = await findUserById(payload.userId);
+          if (user) {
+            cachedReport.inputText = ingredientText.trim();
+            savedScan = await saveScan(user.id, user.name, cachedReport);
+          }
+        }
+      } catch {
+        // Silently skip
+      }
+
+      const finalReport = { ...cachedReport, scanId: savedScan?.id };
+
+      if (isStream) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+
+        // Emulate streaming progress transitions for the client UI state machine
+        res.write(`data: ${JSON.stringify({ type: 'progress', step: 'parsing' })}\n\n`);
+        res.write(`data: ${JSON.stringify({ type: 'progress', step: 'analysing' })}\n\n`);
+        res.write(`data: ${JSON.stringify({ type: 'progress', step: 'checking-bans' })}\n\n`);
+        res.write(`data: ${JSON.stringify({ type: 'progress', step: 'finding-alternatives' })}\n\n`);
+        res.write(`data: ${JSON.stringify({ type: 'progress', step: 'generating-report' })}\n\n`);
+        res.write(`data: ${JSON.stringify({ type: 'done', report: finalReport })}\n\n`);
+        res.end();
+      } else {
+        res.json(finalReport);
+      }
+      return;
+    }
+
+    if (isStream) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+
+      const report = await runPipeline(ingredientText.trim(), country, (step) => {
+        res.write(`data: ${JSON.stringify({ type: 'progress', step })}\n\n`);
+      });
+
+      // If user is authenticated, save to history
+      let savedScan;
+      try {
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+          const payload = verifyToken(authHeader.slice(7));
+          const user = await findUserById(payload.userId);
+          if (user) {
+            report.inputText = ingredientText.trim();
+            savedScan = await saveScan(user.id, user.name, report);
+          }
+        }
+      } catch {
+        // Silently skip
+      }
+
+      res.write(`data: ${JSON.stringify({ type: 'done', report: { ...report, scanId: savedScan?.id } })}\n\n`);
+      res.end();
+      return;
+    }
 
     const report = await runPipeline(ingredientText.trim(), country);
 
@@ -258,6 +333,12 @@ app.post('/api/scan', apiLimiter, scanLimiter, preventConcurrentScans, validate(
   } catch (error: any) {
     const processingTime = Date.now() - startTime;
     logger.error('Scan failed', { error: error.message, processingTimeMs: processingTime, stack: error.stack });
+
+    if (isStream) {
+      res.write(`data: ${JSON.stringify({ type: 'error', error: error.message || 'Scan failed' })}\n\n`);
+      res.end();
+      return;
+    }
 
     if (error.status === 429 || error.message?.includes('429')) {
       const err = Errors.API_OVERLOADED();
@@ -437,9 +518,23 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 });
 
 // ========== Start Server ==========
-app.listen(PORT, () => {
-  logger.info(`🧪 Healthify server running on http://localhost:${PORT}`, {
-    environment: process.env.NODE_ENV || 'development',
-    port: PORT,
+if (isProduction && cluster.isPrimary) {
+  const numCPUs = os.availableParallelism?.() || os.cpus().length;
+  logger.info(`🚀 Primary cluster process ${process.pid} is running. Forking ${numCPUs} workers...`);
+
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+
+  cluster.on('exit', (worker, code, signal) => {
+    logger.warn(`Worker process ${worker.process.pid} died. Forking replacement...`);
+    cluster.fork();
   });
-});
+} else {
+  app.listen(PORT, () => {
+    logger.info(`🧪 Healthify worker process ${process.pid} running on http://localhost:${PORT}`, {
+      environment: process.env.NODE_ENV || 'development',
+      port: PORT,
+    });
+  });
+}
