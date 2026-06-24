@@ -7,9 +7,12 @@ import { hashPasswordSync } from './auth';
 import logger from './utils/logger';
 
 const isTest = process.env.NODE_ENV === 'test';
+const isVercel = process.env.VERCEL === '1';
 const DATA_DIR = isTest
   ? path.normalize(path.join(__dirname, '..', 'data-test'))
-  : path.normalize(path.join(__dirname, '..', 'data'));
+  : isVercel
+    ? '/tmp'
+    : path.normalize(path.join(__dirname, '..', 'data'));
 
 if (!existsSync(DATA_DIR)) {
   mkdirSync(DATA_DIR, { recursive: true });

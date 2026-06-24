@@ -518,23 +518,29 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 });
 
 // ========== Start Server ==========
-if (isProduction && cluster.isPrimary) {
-  const numCPUs = os.availableParallelism?.() || os.cpus().length;
-  logger.info(`🚀 Primary cluster process ${process.pid} is running. Forking ${numCPUs} workers...`);
+const isVercel = process.env.VERCEL === '1';
 
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork();
-  }
+if (!isVercel) {
+  if (isProduction && cluster.isPrimary) {
+    const numCPUs = os.availableParallelism?.() || os.cpus().length;
+    logger.info(`🚀 Primary cluster process ${process.pid} is running. Forking ${numCPUs} workers...`);
 
-  cluster.on('exit', (worker, code, signal) => {
-    logger.warn(`Worker process ${worker.process.pid} died. Forking replacement...`);
-    cluster.fork();
-  });
-} else {
-  app.listen(PORT, () => {
-    logger.info(`🧪 Healthify worker process ${process.pid} running on http://localhost:${PORT}`, {
-      environment: process.env.NODE_ENV || 'development',
-      port: PORT,
+    for (let i = 0; i < numCPUs; i++) {
+      cluster.fork();
+    }
+
+    cluster.on('exit', (worker, code, signal) => {
+      logger.warn(`Worker process ${worker.process.pid} died. Forking replacement...`);
+      cluster.fork();
     });
-  });
+  } else {
+    app.listen(PORT, () => {
+      logger.info(`🧪 Healthify worker process ${process.pid} running on http://localhost:${PORT}`, {
+        environment: process.env.NODE_ENV || 'development',
+        port: PORT,
+      });
+    });
+  }
 }
+
+export default app;
